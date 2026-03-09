@@ -30,6 +30,7 @@ import CancellationPolicyScreen from '../screens/orders/CancellationPolicyScreen
 // Profile
 import TrustedContactScreen from '../screens/profile/TrustedContactScreen';
 import AddTrustedContactScreen from '../screens/profile/AddTrustedContactScreen';
+import EditTrustedContactScreen from '../screens/profile/EditTrustedContactScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SecuritySettingsScreen from '../screens/profile/SecuritySettingsScreen';
 import ChangePasswordScreen from '../screens/profile/ChangePasswordScreen';
@@ -138,6 +139,7 @@ export default function RootNavigator() {
                             {/* Profile Screens */}
                             <Stack.Screen name="TrustedContact" component={TrustedContactScreen} />
                             <Stack.Screen name="AddTrustedContact" component={AddTrustedContactScreen} />
+                            <Stack.Screen name="EditTrustedContact" component={EditTrustedContactScreen} />
                             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                             <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
                             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />

@@ -110,7 +110,7 @@ export default function SupportFormScreen() {
                 <View style={styles.formSection}>
 
                     {/* Subject Field */}
-                    <View style={styles.inputGroup}>
+                    <View style={[styles.inputGroup, { zIndex: 10 }]}>
                         <Text style={styles.inputLabel}>What do you need help with?</Text>
                         <Pressable
                             style={styles.dropdownButton}

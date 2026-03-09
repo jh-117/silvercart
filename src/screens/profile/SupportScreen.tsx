@@ -275,8 +275,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: theme.colors.white,
         borderRadius: 16,
-        borderWidth: 1,
-        borderColor: theme.colors.borderLight,
         overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -359,8 +357,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         borderRadius: 12,
         padding: 16,
-        borderWidth: 1,
-        borderColor: theme.colors.borderLight,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.04,
@@ -369,7 +365,6 @@ const styles = StyleSheet.create({
     },
     faqItemOpen: {
         backgroundColor: `${theme.colors.primary}05`,
-        borderColor: 'transparent',
     },
     faqHeader: {
         flexDirection: 'row',

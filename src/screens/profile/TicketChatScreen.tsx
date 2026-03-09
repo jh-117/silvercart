@@ -4,7 +4,7 @@ import {
     TextInput, KeyboardAvoidingView, Platform, Keyboard,
     Image
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -16,6 +16,7 @@ const ADMIN_AVATAR = 'https://ui-avatars.com/api/?name=Admin+Support&background=
 export default function TicketChatScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
+    const insets = useSafeAreaInsets();
     const { user } = useAuth();
 
     // We expect a ticketId or just a newly created ticket from the route
@@ -164,7 +165,7 @@ export default function TicketChatScreen() {
                 </ScrollView>
 
                 {/* Input Area */}
-                <View style={styles.inputArea}>
+                <View style={[styles.inputArea, { paddingBottom: Math.max(insets.bottom, 12) }]}>
                     <View style={styles.inputContainer}>
                         <Pressable style={styles.attachButton}>
                             <MaterialIcons name="add-circle-outline" size={26} color={theme.colors.textMuted} />
@@ -376,7 +377,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: theme.colors.borderLight,
         padding: 12,
-        paddingBottom: Platform.OS === 'ios' ? 24 : 12,
     },
     inputContainer: {
         flexDirection: 'row',

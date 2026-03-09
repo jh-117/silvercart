@@ -46,6 +46,7 @@ export type RootStackParamList = {
     // Profile
     TrustedContact: undefined;
     AddTrustedContact: undefined;
+    EditTrustedContact: { contactId: string };
     EditProfile: undefined;
     SecuritySettings: undefined;
     ChangePassword: undefined;

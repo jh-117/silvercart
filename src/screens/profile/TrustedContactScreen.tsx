@@ -133,6 +133,7 @@ export default function TrustedContactScreen() {
                                 <View style={styles.actionButtonsContainer}>
                                     <Pressable
                                         style={({ pressed }) => [styles.editButton, pressed && styles.buttonPressedOpacity]}
+                                        onPress={() => navigation.navigate('EditTrustedContact', { contactId: contact.id })}
                                     >
                                         <MaterialIcons name="edit" size={24} color={theme.colors.white} />
                                         <Text style={styles.editButtonText}>Edit Contact Details</Text>
