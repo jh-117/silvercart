@@ -28,7 +28,7 @@ export default function AddTrustedContactScreen() {
     const [showRelationshipPicker, setShowRelationshipPicker] = useState(false);
     const [notifyNewOrders, setNotifyNewOrders] = useState(true);
     const [notifyDelivery, setNotifyDelivery] = useState(true);
-    const [notifyPromotions, setNotifyPromotions] = useState(false);
+    const [notifySecurity, setNotifySecurity] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const finishSetup = () => {
@@ -48,6 +48,18 @@ export default function AddTrustedContactScreen() {
 
         setSaving(true);
         try {
+            // Check current count
+            const { count, error: countError } = await supabase
+                .from('trusted_contacts')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id);
+
+            if (countError) throw countError;
+            if (count && count >= 2) {
+                Alert.alert('Limit Reached', 'You can only have a maximum of 2 trusted contacts.');
+                return;
+            }
+
             const { error } = await supabase
                 .from('trusted_contacts')
                 .insert({
@@ -57,7 +69,7 @@ export default function AddTrustedContactScreen() {
                     relationship,
                     notify_new_orders: notifyNewOrders,
                     notify_delivery: notifyDelivery,
-                    notify_promotions: notifyPromotions,
+                    notify_security: notifySecurity,
                 });
 
             if (error) throw error;
@@ -190,14 +202,14 @@ export default function AddTrustedContactScreen() {
 
                         <Pressable
                             style={styles.checkboxRow}
-                            onPress={() => setNotifyPromotions(!notifyPromotions)}
+                            onPress={() => setNotifySecurity(!notifySecurity)}
                         >
-                            <View style={[styles.checkbox, notifyPromotions && styles.checkboxChecked]}>
-                                {notifyPromotions && (
+                            <View style={[styles.checkbox, notifySecurity && styles.checkboxChecked]}>
+                                {notifySecurity && (
                                     <MaterialIcons name="check" size={20} color={theme.colors.white} />
                                 )}
                             </View>
-                            <Text style={styles.checkboxLabel}>Promotions and deals</Text>
+                            <Text style={styles.checkboxLabel}>Security alerts</Text>
                         </Pressable>
                     </View>
                 </View>

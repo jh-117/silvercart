@@ -149,7 +149,7 @@ export default function TrustedContactScreen() {
                                     {/* Add new / Remove layout */}
                                     {index === contacts.length - 1 && (
                                         <View style={styles.footerActionsRow}>
-                                            {contacts.length < 3 && (
+                                            {contacts.length < 2 && (
                                                 <Pressable
                                                     style={styles.addAnotherButton}
                                                     onPress={() => navigation.navigate('AddTrustedContact')}

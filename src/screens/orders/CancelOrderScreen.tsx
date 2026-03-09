@@ -5,6 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getOrderById, updateOrderStatus, SupabaseOrder } from '../../services/orders.service';
+import { AuthContext } from '../../contexts/AuthContext';
+import { notificationsService } from '../../services/notifications.service';
 
 // Policy: customer may cancel within 1 HOUR of placing the order (status = 'pending')
 const CANCEL_WINDOW_SECONDS = 3600; // 1 hour
@@ -13,6 +15,7 @@ export default function CancelOrderScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { orderId } = route.params ?? {};
+    const { user } = React.useContext(AuthContext);
 
     const [order, setOrder] = useState<SupabaseOrder | null>(null);
     const [loading, setLoading] = useState(true);
@@ -76,6 +79,14 @@ export default function CancelOrderScreen() {
                         const result = await updateOrderStatus(order.id, 'cancelled');
                         setCancelling(false);
                         if (result.success) {
+                            if (user?.id) {
+                                await notificationsService.notifyTrustedContacts(
+                                    user.id,
+                                    order.id,
+                                    'order_cancelled',
+                                    `Order #${order.id.slice(0, 8).toUpperCase()} has been cancelled by the user.`
+                                );
+                            }
                             Alert.alert('Order Cancelled', 'Your order has been cancelled successfully.', [
                                 { text: 'OK', onPress: () => { navigation.popToTop(); } }
                             ]);
