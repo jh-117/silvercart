@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 
 import { AuthProvider } from './src/contexts/AuthContext';
+import { AppSettingsProvider } from './src/contexts/AppSettingsContext';
 import { ToastProvider } from './src/contexts/ToastProvider';
 import { CartProvider } from './src/contexts/CartContext';
 import { OrderProvider } from './src/contexts/OrderContext';
@@ -43,14 +44,16 @@ export default function App() {
   return (
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <AuthProvider>
-        <CartProvider>
-          <OrderProvider>
-            <ToastProvider>
-              <RootNavigator />
-              <StatusBar style="auto" />
-            </ToastProvider>
-          </OrderProvider>
-        </CartProvider>
+        <AppSettingsProvider>
+          <CartProvider>
+            <OrderProvider>
+              <ToastProvider>
+                <RootNavigator />
+                <StatusBar style="auto" />
+              </ToastProvider>
+            </OrderProvider>
+          </CartProvider>
+        </AppSettingsProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Linking, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { useNavigation } from '@react-navigation/native';
 import CustomSwitch from '../../components/ui/CustomSwitch';
 import CustomAlert from '../../components/ui/CustomAlert';
+import { useAppSettings } from '../../contexts/AppSettingsContext';
 
 export default function AppSettingsScreen() {
     const navigation = useNavigation();
-    const [language, setLanguage] = useState('en');
-    const [pushNotifications, setPushNotifications] = useState(true);
-    const [emailUpdates, setEmailUpdates] = useState(false);
-    const [smsAlerts, setSmsAlerts] = useState(true);
-    const [textSize, setTextSize] = useState(2); // 1-4 scale
+    const { settings, loading, updateSettings } = useAppSettings();
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
+    if (loading || !settings) {
+        return (
+            <View style={[styles.container, styles.centered]}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
+        );
+    }
+
     const textSizeLabels = ['Small', 'Medium', 'Large', 'Extra Large'];
+    const textSizeMap: ('small' | 'medium' | 'large' | 'xl')[] = ['small', 'medium', 'large', 'xl'];
+    const currentTextSizeIdx = textSizeMap.indexOf(settings.text_size);
+
+    const handleTextSizeChange = (index: number) => {
+        updateSettings({ text_size: textSizeMap[index] });
+    };
 
     return (
         <View style={styles.container}>
@@ -57,26 +68,26 @@ export default function AppSettingsScreen() {
                                 styles.languageOption,
                                 { borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }
                             ]}
-                            onPress={() => setLanguage('en')}
+                            onPress={() => updateSettings({ language: 'en' })}
                         >
                             <View style={styles.languageInfo}>
                                 <Text style={styles.languageTitle}>English (EN)</Text>
                                 <Text style={styles.languageSubtitle}>Standard interface language</Text>
                             </View>
-                            <View style={[styles.radio, language === 'en' && styles.radioSelected]}>
-                                {language === 'en' && <View style={styles.radioInner} />}
+                            <View style={[styles.radio, settings.language === 'en' && styles.radioSelected]}>
+                                {settings.language === 'en' && <View style={styles.radioInner} />}
                             </View>
                         </Pressable>
                         <Pressable
                             style={styles.languageOption}
-                            onPress={() => setLanguage('bm')}
+                            onPress={() => updateSettings({ language: 'bm' })}
                         >
                             <View style={styles.languageInfo}>
                                 <Text style={styles.languageTitle}>Bahasa Malaysia (BM)</Text>
                                 <Text style={styles.languageSubtitle}>Bahasa kebangsaan</Text>
                             </View>
-                            <View style={[styles.radio, language === 'bm' && styles.radioSelected]}>
-                                {language === 'bm' && <View style={styles.radioInner} />}
+                            <View style={[styles.radio, settings.language === 'bm' && styles.radioSelected]}>
+                                {settings.language === 'bm' && <View style={styles.radioInner} />}
                             </View>
                         </Pressable>
                     </View>
@@ -95,8 +106,8 @@ export default function AppSettingsScreen() {
                                 <Text style={styles.toggleSubtitle}>Get delivery updates on your lock screen</Text>
                             </View>
                             <CustomSwitch
-                                value={pushNotifications}
-                                onValueChange={setPushNotifications}
+                                value={settings.push_notifications_enabled}
+                                onValueChange={(val) => updateSettings({ push_notifications_enabled: val })}
                             />
                         </View>
                         <View style={[styles.toggleRow, { borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }]}>
@@ -105,8 +116,8 @@ export default function AppSettingsScreen() {
                                 <Text style={styles.toggleSubtitle}>Monthly newsletters and special discounts</Text>
                             </View>
                             <CustomSwitch
-                                value={emailUpdates}
-                                onValueChange={setEmailUpdates}
+                                value={settings.email_notifications_enabled}
+                                onValueChange={(val) => updateSettings({ email_notifications_enabled: val })}
                             />
                         </View>
                         <View style={styles.toggleRow}>
@@ -115,8 +126,8 @@ export default function AppSettingsScreen() {
                                 <Text style={styles.toggleSubtitle}>Urgent order and account security alerts</Text>
                             </View>
                             <CustomSwitch
-                                value={smsAlerts}
-                                onValueChange={setSmsAlerts}
+                                value={settings.sms_notifications_enabled}
+                                onValueChange={(val) => updateSettings({ sms_notifications_enabled: val })}
                             />
                         </View>
                     </View>
@@ -137,11 +148,11 @@ export default function AppSettingsScreen() {
                                     <Pressable
                                         key={index}
                                         style={styles.sliderDot}
-                                        onPress={() => setTextSize(index + 1)}
+                                        onPress={() => handleTextSizeChange(index)}
                                     >
                                         <View style={[
                                             styles.sliderDotInner,
-                                            textSize === index + 1 && styles.sliderDotActive
+                                            currentTextSizeIdx === index && styles.sliderDotActive
                                         ]} />
                                     </Pressable>
                                 ))}
@@ -154,7 +165,7 @@ export default function AppSettingsScreen() {
                                     key={index}
                                     style={[
                                         styles.textSizeLabelText,
-                                        textSize === index + 1 && styles.textSizeLabelActive
+                                        currentTextSizeIdx === index && styles.textSizeLabelActive
                                     ]}
                                 >
                                     {label}
@@ -162,10 +173,35 @@ export default function AppSettingsScreen() {
                             ))}
                         </View>
                         <View style={styles.previewCard}>
-                            <Text style={[styles.previewText, { fontSize: 12 + textSize * 2 }]}>
+                            <Text style={[styles.previewText, { fontSize: 14 + (currentTextSizeIdx * 4) }]}>
                                 "This is how your text will look. Larger text makes reading easier."
                             </Text>
                         </View>
+
+                        {/* High Contrast Toggle */}
+                        <View style={[styles.toggleRow, { borderTopWidth: 1, borderTopColor: theme.colors.borderLight }]}>
+                            <View style={styles.toggleInfo}>
+                                <Text style={styles.toggleTitle}>High Contrast Mode</Text>
+                                <Text style={styles.toggleSubtitle}>Increase text visibility and color contrast</Text>
+                            </View>
+                            <CustomSwitch
+                                value={settings.high_contrast_mode}
+                                onValueChange={(val) => updateSettings({ high_contrast_mode: val })}
+                            />
+                        </View>
+
+                        {/* Voice Feedback Toggle */}
+                        <View style={[styles.toggleRow, { borderTopWidth: 1, borderTopColor: theme.colors.borderLight }]}>
+                            <View style={styles.toggleInfo}>
+                                <Text style={styles.toggleTitle}>Voice Feedback</Text>
+                                <Text style={styles.toggleSubtitle}>Read screen selections aloud</Text>
+                            </View>
+                            <CustomSwitch
+                                value={settings.voice_feedback_enabled}
+                                onValueChange={(val) => updateSettings({ voice_feedback_enabled: val })}
+                            />
+                        </View>
+
                         {/* Open System Accessibility */}
                         <Pressable
                             style={({ pressed }) => [styles.accessibilityButton, pressed && styles.buttonPressed]}
@@ -243,7 +279,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.backgroundLight,
-
+    },
+    centered: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         backgroundColor: theme.colors.white,
