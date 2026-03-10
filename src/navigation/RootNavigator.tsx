@@ -52,6 +52,8 @@ import ErrorScreen from '../screens/special/ErrorScreen';
 import VoiceSearchScreen from '../screens/voice/VoiceSearchScreen';
 import CategoryScreen from '../screens/products/CategoryScreen';
 
+import GlobalVoiceButton from '../components/ui/GlobalVoiceButton';
+
 const Stack = createNativeStackNavigator();
 
 function LoadingScreen() {
@@ -164,7 +166,10 @@ export default function RootNavigator() {
                 <Stack.Screen name="VoiceSearch" component={VoiceSearchScreen} options={{ presentation: 'modal' }} />
                 <Stack.Screen name="Category" component={CategoryScreen} />
             </Stack.Navigator>
+
+            {/* Inject Global Voice Floating Action Button */}
+            <GlobalVoiceButton />
+
         </NavigationContainer>
     );
 }
-

@@ -192,6 +192,8 @@ export default function VoiceSearchScreen() {
         }
     };
 
+    const [showHelp, setShowHelp] = useState(false);
+
     const handleMicPress = async () => {
         if (isListening) {
             await stopListening();
@@ -253,25 +255,45 @@ export default function VoiceSearchScreen() {
                     )}
                 </View>
 
-                <View style={styles.hintsContainer}>
-                    <Text style={styles.hintsTitle}>Try saying:</Text>
-                    <View style={styles.hintItem}>
-                        <MaterialIcons name="search" size={20} color="rgba(255,255,255,0.7)" />
-                        <Text style={styles.hintText}>"Search for milk"</Text>
+                {/* Toggleable Help Section */}
+                <Pressable
+                    style={styles.helpToggleButton}
+                    onPress={() => setShowHelp(!showHelp)}
+                >
+                    <MaterialIcons name="info-outline" size={24} color={theme.colors.white} />
+                    <Text style={styles.helpToggleText}>What can I say?</Text>
+                    <MaterialIcons name={showHelp ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color={theme.colors.white} />
+                </Pressable>
+
+                {showHelp ? (
+                    <View style={styles.fullHintsContainer}>
+                        <Text style={styles.categoryTitle}>Shopping</Text>
+                        <Text style={styles.hintText}>• "Search for milk"</Text>
+                        <Text style={styles.hintText}>• "I need paracetamol"</Text>
+                        <Text style={styles.hintText}>• "Add bread to cart"</Text>
+
+                        <Text style={[styles.categoryTitle, { marginTop: 12 }]}>Cart & Checkout</Text>
+                        <Text style={styles.hintText}>• "Show my cart"</Text>
+                        <Text style={styles.hintText}>• "Checkout"</Text>
+
+                        <Text style={[styles.categoryTitle, { marginTop: 12 }]}>Navigation</Text>
+                        <Text style={styles.hintText}>• "Where are my orders?"</Text>
+                        <Text style={styles.hintText}>• "Go to my profile"</Text>
+                        <Text style={styles.hintText}>• "Show me pharmacy"</Text>
                     </View>
-                    <View style={styles.hintItem}>
-                        <MaterialIcons name="local-pharmacy" size={20} color="rgba(255,255,255,0.7)" />
-                        <Text style={styles.hintText}>"Show me pharmacy"</Text>
+                ) : (
+                    <View style={styles.hintsContainer}>
+                        <Text style={styles.hintsTitle}>Try saying:</Text>
+                        <View style={styles.hintItem}>
+                            <MaterialIcons name="search" size={20} color="rgba(255,255,255,0.7)" />
+                            <Text style={styles.hintText}>"Search for milk"</Text>
+                        </View>
+                        <View style={styles.hintItem}>
+                            <MaterialIcons name="shopping-cart" size={20} color="rgba(255,255,255,0.7)" />
+                            <Text style={styles.hintText}>"Show my cart"</Text>
+                        </View>
                     </View>
-                    <View style={styles.hintItem}>
-                        <MaterialIcons name="shopping-cart" size={20} color="rgba(255,255,255,0.7)" />
-                        <Text style={styles.hintText}>"Show my cart"</Text>
-                    </View>
-                    <View style={styles.hintItem}>
-                        <MaterialIcons name="history" size={20} color="rgba(255,255,255,0.7)" />
-                        <Text style={styles.hintText}>"Where are my orders?"</Text>
-                    </View>
-                </View>
+                )}
             </View>
         </SafeAreaView>
     );
@@ -312,7 +334,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: theme.colors.white,
         textAlign: 'center',
-        marginBottom: 60,
+        marginBottom: 30,
         minHeight: 80,
         fontFamily: theme.typography.fontFamily.bold,
     },
@@ -322,7 +344,7 @@ const styles = StyleSheet.create({
         height: 140,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 60,
+        marginBottom: 30,
     },
     processingContainer: {
         position: 'absolute',
@@ -358,6 +380,36 @@ const styles = StyleSheet.create({
     micButtonActive: {
         backgroundColor: theme.colors.primary,
     },
+    helpToggleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 24,
+        marginBottom: 16,
+        gap: 8,
+    },
+    helpToggleText: {
+        color: theme.colors.white,
+        fontSize: 16,
+        fontFamily: theme.typography.fontFamily.bold,
+    },
+    fullHintsContainer: {
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        padding: 24,
+        borderRadius: 16,
+        maxHeight: 250,
+    },
+    categoryTitle: {
+        color: theme.colors.primaryLight,
+        fontSize: 14,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 8,
+        fontFamily: theme.typography.fontFamily.bold,
+    },
     hintsContainer: {
         width: '100%',
         backgroundColor: 'rgba(0,0,0,0.2)',
@@ -378,8 +430,9 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     hintText: {
-        fontSize: 18,
+        fontSize: 16,
         color: theme.colors.white,
         fontFamily: theme.typography.fontFamily.medium,
+        marginBottom: 4,
     },
 });
