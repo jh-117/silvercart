@@ -109,9 +109,10 @@ export function useVoiceRecognition(): VoiceRecognitionHook {
 
     const startListening = useCallback(async () => {
         if (!Voice) {
-            setError('Voice recognition is not available. Please run the app via "npx expo run:android".');
+            setError('Voice recognition requires the native build. Shake device → Reload.');
             return;
         }
+        // Detect broken native bridge (occurs when module loads but native side is null)
         try {
             const granted = await requestMicrophonePermission();
             if (!granted) {
@@ -122,9 +123,13 @@ export function useVoiceRecognition(): VoiceRecognitionHook {
             setError(null);
             setTranscript('');
             await Voice.start('en-US');
-        } catch (err) {
-            console.error('[VoiceRecognition] Error starting:', err);
-            setError('Failed to start voice recognition. Please try again.');
+        } catch (err: any) {
+            console.warn('[VoiceRecognition] Error starting:', err);
+            if (err?.message?.includes('startSpeech') || err?.message?.includes('null')) {
+                setError('Voice module not linked. Please fully close and reopen the app.');
+            } else {
+                setError('Failed to start voice recognition. Please try again.');
+            }
         }
     }, []);
 
@@ -134,7 +139,7 @@ export function useVoiceRecognition(): VoiceRecognitionHook {
             await Voice.stop();
             setIsListening(false);
         } catch (err) {
-            console.error('[VoiceRecognition] Error stopping:', err);
+            console.warn('[VoiceRecognition] Error stopping:', err);
         }
     }, []);
 

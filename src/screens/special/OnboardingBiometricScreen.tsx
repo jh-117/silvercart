@@ -1,16 +1,52 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { PrimaryButton } from '../../components/common/PrimaryButton';
 import { OnboardingBiometricScreenProps } from '../../navigation/types';
+import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { useNavigation } from '@react-navigation/native';
 
-export default function OnboardingBiometricScreen({ navigation }: OnboardingBiometricScreenProps) {
-    const handleEnable = () => {
-        // Logic to enable biometrics via Expo LocalAuthentication
-        console.log('Enabling biometrics...');
-        navigation.navigate('OnboardingTutorial');
+export default function OnboardingBiometricScreen() {
+    const navigation = useNavigation<OnboardingBiometricScreenProps['navigation']>();
+
+    const handleEnable = async () => {
+        try {
+            const compatible = await LocalAuthentication.hasHardwareAsync();
+            const enrolled = await LocalAuthentication.isEnrolledAsync();
+
+            if (!compatible) {
+                Alert.alert('Not Supported', 'Your device does not support biometric authentication.');
+                navigation.navigate('OnboardingTutorial');
+                return;
+            }
+            if (!enrolled) {
+                Alert.alert('No Biometrics Set Up', 'Please set up Face ID or fingerprint in your device settings first.');
+                navigation.navigate('OnboardingTutorial');
+                return;
+            }
+
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage: 'Confirm to enable biometric login',
+                cancelLabel: 'Cancel',
+                disableDeviceFallback: false,
+            });
+
+            if (result.success) {
+                await SecureStore.setItemAsync('biometrics_enabled', 'true');
+                Alert.alert('Biometrics Enabled!', 'You will now use Face ID or fingerprint to sign in.', [
+                    { text: 'Continue', onPress: () => navigation.navigate('OnboardingTutorial') }
+                ]);
+            } else {
+                // User cancelled or failed - just move on without enabling
+                navigation.navigate('OnboardingTutorial');
+            }
+        } catch (e) {
+            console.error('Error enabling biometrics setup', e);
+            navigation.navigate('OnboardingTutorial');
+        }
     };
 
     const handleSkip = () => {

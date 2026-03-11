@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, Alert, Platform, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -8,6 +8,7 @@ import { useVoiceRecognition } from '../../hooks/useVoiceRecognition';
 import { processVoiceCommand } from '../../services/aiService';
 import { useToast } from '../../hooks/useToast';
 import { supabase } from '../../services/supabase';
+import * as Speech from 'expo-speech';
 
 export default function VoiceSearchScreen() {
     const navigation = useNavigation<any>();
@@ -98,12 +99,17 @@ export default function VoiceSearchScreen() {
         }
     };
 
+    const speakAndSetStatus = (text: string) => {
+        setStatusText(text);
+        Speech.speak(text, { language: 'en-US', rate: 1.0 });
+    };
+
     const handleVoiceCommand = async (command: any) => {
         try {
             switch (command.intent) {
                 case 'search':
                     if (command.params?.query) {
-                        setStatusText(`Searching for "${command.params.query}"...`);
+                        speakAndSetStatus(`Searching for "${command.params.query}"...`);
                         setTimeout(() => {
                             navigation.navigate('SearchResults', {
                                 query: command.params.query,
@@ -115,7 +121,7 @@ export default function VoiceSearchScreen() {
 
                 case 'navigate':
                     if (command.params?.category) {
-                        setStatusText(`Opening ${command.params.category}...`);
+                        speakAndSetStatus(`Opening ${command.params.category}...`);
                         setTimeout(() => {
                             navigation.navigate('Category', {
                                 category: command.params.category
@@ -125,21 +131,21 @@ export default function VoiceSearchScreen() {
                     break;
 
                 case 'cart':
-                    setStatusText('Opening your cart...');
+                    speakAndSetStatus('Opening your cart...');
                     setTimeout(() => {
                         navigation.navigate('Cart');
                     }, 500);
                     break;
 
                 case 'orders':
-                    setStatusText('Opening your orders...');
+                    speakAndSetStatus('Opening your orders...');
                     setTimeout(() => {
                         navigation.navigate('Orders');
                     }, 500);
                     break;
 
                 case 'profile':
-                    setStatusText('Opening your profile...');
+                    speakAndSetStatus('Opening your profile...');
                     setTimeout(() => {
                         navigation.navigate('Profile');
                     }, 500);
@@ -159,36 +165,83 @@ export default function VoiceSearchScreen() {
                                 }, { onConflict: 'user_id,product_id' });
 
                                 toast.showSuccess(`Added ${product.name} to cart.`);
+                                speakAndSetStatus(`Added ${product.name} to your cart.`);
                                 setTimeout(() => {
                                     navigation.navigate('Cart');
-                                }, 1000);
+                                }, 1500);
                             } else {
                                 toast.showWarning(`Could not find product: ${command.product}`);
+                                speakAndSetStatus(`I couldn't find ${command.product}, here are some alternatives.`);
                                 setTimeout(() => {
                                     navigation.navigate('SearchResults', { query: command.product, category: 'all' });
-                                }, 500);
+                                }, 1500);
                             }
                         } catch (err) {
                             console.error('Cart add error', err);
                             toast.showError('Failed to add to cart');
+                            speakAndSetStatus('Sorry, I failed to add that to your cart.');
                         }
                     }
                     break;
 
                 case 'checkout':
-                    setStatusText('Opening checkout...');
+                    speakAndSetStatus('Opening checkout...');
                     setTimeout(() => {
-                        navigation.navigate('Checkout');
+                        navigation.navigate('CheckoutAddress');
                     }, 500);
+                    break;
+                    
+                case 'support':
+                    speakAndSetStatus('Opening help and support...');
+                    setTimeout(() => {
+                        navigation.navigate('Support');
+                    }, 500);
+                    break;
+                    
+                case 'call_contact':
+                    if (command.contactName) {
+                        try {
+                            const { data: userData } = await supabase.auth.getUser();
+                            if (userData.user) {
+                                speakAndSetStatus(`Looking up ${command.contactName}...`);
+                                const { data: contacts } = await supabase
+                                    .from('trusted_contacts')
+                                    .select('*')
+                                    .eq('user_id', userData.user.id)
+                                    .ilike('name', `%${command.contactName}%`);
+                                    
+                                if (contacts && contacts.length > 0) {
+                                    speakAndSetStatus(`Calling ${contacts[0].name}...`);
+                                    setTimeout(() => {
+                                        Linking.openURL(`tel:${contacts[0].phone_number}`).catch(() => {
+                                            toast.showError('Unable to open phone dialer');
+                                        });
+                                    }, 1000);
+                                } else {
+                                    speakAndSetStatus(`I could not find ${command.contactName} in your Trusted Contacts.`);
+                                    toast.showWarning(`Contact "${command.contactName}" not found.`);
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Contact search error', err);
+                            speakAndSetStatus('Sorry, I failed to look up your contacts.');
+                        }
+                    } else {
+                        speakAndSetStatus('Who would you like to call? Please try again in your Trusted Contacts list.');
+                        setTimeout(() => {
+                            navigation.navigate('Profile');
+                        }, 1500);
+                    }
                     break;
 
                 default:
                     toast.showInfo('Try saying "search for milk" or "show my cart"');
-                    setStatusText('Tap the microphone to try again');
+                    speakAndSetStatus('I did not understand that. Try saying search for milk.');
             }
         } catch (err) {
             console.error('Navigation error:', err);
             toast.showError('Failed to navigate. Please try again.');
+            speakAndSetStatus('Failed to navigate. Please try again.');
         }
     };
 
@@ -222,37 +275,34 @@ export default function VoiceSearchScreen() {
                 </Text>
 
                 <View style={styles.micContainer}>
-                    {isProcessing ? (
-                        <View style={styles.processingContainer}>
-                            <Animated.View style={[styles.micRing, { transform: [{ scale: pulseAnim }], opacity: 0.5, backgroundColor: theme.colors.primary }]} />
-                        </View>
-                    ) : (
-                        <>
-                            <Animated.View
-                                style={[
-                                    styles.micRing,
-                                    {
-                                        transform: [{ scale: pulseAnim }],
-                                        opacity: isListening ? 0.3 : 0
-                                    }
-                                ]}
+                    <Animated.View
+                        style={[
+                            styles.micRing,
+                            {
+                                transform: [{ scale: pulseAnim }],
+                                opacity: isListening || isProcessing ? 0.3 : 0,
+                                backgroundColor: isProcessing ? theme.colors.primary : undefined
+                            }
+                        ]}
+                    />
+                    <Pressable
+                        style={[
+                            styles.micButton,
+                            (isListening || isProcessing) && styles.micButtonActive
+                        ]}
+                        onPress={isProcessing ? undefined : handleMicPress}
+                        hitSlop={8}
+                    >
+                        {isProcessing ? (
+                            <ActivityIndicator size="large" color={theme.colors.white} />
+                        ) : (
+                            <MaterialIcons
+                                name={isListening ? 'mic' : 'mic-none'}
+                                size={64}
+                                color={theme.colors.white}
                             />
-                            <Pressable
-                                style={[
-                                    styles.micButton,
-                                    isListening && styles.micButtonActive
-                                ]}
-                                onPress={handleMicPress}
-                                hitSlop={8}
-                            >
-                                <MaterialIcons
-                                    name={isListening ? 'mic' : 'mic-none'}
-                                    size={64}
-                                    color={theme.colors.white}
-                                />
-                            </Pressable>
-                        </>
-                    )}
+                        )}
+                    </Pressable>
                 </View>
 
                 {/* Toggleable Help Section */}
@@ -265,8 +315,12 @@ export default function VoiceSearchScreen() {
                     <MaterialIcons name={showHelp ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color={theme.colors.white} />
                 </Pressable>
 
-                {showHelp ? (
-                    <View style={styles.fullHintsContainer}>
+                {showHelp && (
+                    <ScrollView
+                        style={styles.fullHintsContainer}
+                        contentContainerStyle={{ paddingBottom: 40 }}
+                        showsVerticalScrollIndicator={false}
+                    >
                         <Text style={styles.categoryTitle}>Shopping</Text>
                         <Text style={styles.hintText}>• "Search for milk"</Text>
                         <Text style={styles.hintText}>• "I need paracetamol"</Text>
@@ -280,8 +334,10 @@ export default function VoiceSearchScreen() {
                         <Text style={styles.hintText}>• "Where are my orders?"</Text>
                         <Text style={styles.hintText}>• "Go to my profile"</Text>
                         <Text style={styles.hintText}>• "Show me pharmacy"</Text>
-                    </View>
-                ) : (
+                    </ScrollView>
+                )}
+                
+                {!showHelp && (
                     <View style={styles.hintsContainer}>
                         <Text style={styles.hintsTitle}>Try saying:</Text>
                         <View style={styles.hintItem}>
@@ -403,7 +459,7 @@ const styles = StyleSheet.create({
         maxHeight: 250,
     },
     categoryTitle: {
-        color: theme.colors.primaryLight,
+        color: 'rgba(255,255,255,0.7)',
         fontSize: 14,
         textTransform: 'uppercase',
         letterSpacing: 1,

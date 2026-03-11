@@ -58,8 +58,13 @@ export default function SearchResultsScreen() {
         navigation.navigate('ProductDetails', {
             productId: product.id,
             productName: product.name,
-            price: product.price,
-            image: product.image_url
+            price: `RM ${product.price.toFixed(2)}`,
+            image: product.image_url,
+            description: product.description,
+            brand: 'SilverCare',
+            rating: 4.5,
+            reviews: Math.floor(Math.random() * 200) + 50,
+            inStock: product.stock_status === 'in_stock'
         });
     };
 

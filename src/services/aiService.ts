@@ -53,12 +53,15 @@ SUPPORTED INTENTS:
 - "view_cart": User wants to see their cart
 - "checkout": User wants to complete purchase
 - "navigate": User wants to go to orders, profile, or category (params.category / params.screen)
+- "call_contact": User wants to call a contact (e.g. "my son", "doctor", "emergency"). Try to extract the requested name into "contactName".
+- "support": User wants help, support, or live chat
 - "unknown": Cannot determine intent
 
 RESPONSE FORMAT (JSON ONLY, NO MARKDOWN TAGS):
 {
   "intent": "search",
   "product": "exact product name",
+  "contactName": "son", // ONLY if intent is call_contact
   "quantity": 1,
   "confidence": 0.85,
   "response": "Friendly confirmation message for the user. E.g: Let me find paracetamol for you."
@@ -69,6 +72,7 @@ IMPORTANT:
 - If intent is view_cart, checkout, set intent accordingly.
 - If intent is orders, set intent: "navigate", params: { screen: "Orders" }
 - If intent is profile, set intent: "navigate", params: { screen: "Profile" }
+- If intent is support or help, set intent: "navigate", params: { screen: "Support" }
 - Quantity defaults to 1 if not specified
 - Return ONLY valid JSON. Wait for the user request, do not output anything else.
 `;

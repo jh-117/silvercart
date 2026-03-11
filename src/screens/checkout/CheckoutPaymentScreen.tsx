@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     paymentOptionSelected: {
         borderWidth: 1.5,
         borderColor: theme.colors.primary,
-        backgroundColor: `${theme.colors.primary}05`,
+        backgroundColor: '#F8FDF9',
     },
     optionContent: {
         flex: 1,

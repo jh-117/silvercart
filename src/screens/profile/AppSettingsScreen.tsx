@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Linking, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -7,6 +7,18 @@ import { useNavigation } from '@react-navigation/native';
 import CustomSwitch from '../../components/ui/CustomSwitch';
 import CustomAlert from '../../components/ui/CustomAlert';
 import { useAppSettings } from '../../contexts/AppSettingsContext';
+
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+    handleNotification: async (): Promise<any> => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
 
 export default function AppSettingsScreen() {
     const navigation = useNavigation();
@@ -27,6 +39,35 @@ export default function AppSettingsScreen() {
 
     const handleTextSizeChange = (index: number) => {
         updateSettings({ text_size: textSizeMap[index] });
+    };
+
+    const handleNotificationToggle = async (val: boolean) => {
+        updateSettings({ push_notifications_enabled: val });
+        
+        if (val) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+            
+            if (finalStatus !== 'granted') {
+                Alert.alert('Permission needed', 'Please enable notifications in your device settings.');
+                updateSettings({ push_notifications_enabled: false });
+                return;
+            }
+            
+            // Send a test welcome notification
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Notifications Enabled! 🔔",
+                    body: "You'll now receive order updates and reminders.",
+                },
+                trigger: { seconds: 2 } as any,
+            });
+        }
     };
 
     return (
@@ -107,7 +148,7 @@ export default function AppSettingsScreen() {
                             </View>
                             <CustomSwitch
                                 value={settings.push_notifications_enabled}
-                                onValueChange={(val) => updateSettings({ push_notifications_enabled: val })}
+                                onValueChange={handleNotificationToggle}
                             />
                         </View>
                         <View style={[styles.toggleRow, { borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }]}>

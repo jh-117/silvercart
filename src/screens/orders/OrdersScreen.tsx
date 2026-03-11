@@ -9,6 +9,7 @@ import { theme } from '../../theme';
 import { useNavigation } from '@react-navigation/native';
 import { useToast } from '../../contexts/ToastProvider';
 import { useAuth } from '../../hooks/useAuth';
+import { useCart } from '../../contexts/CartContext';
 import { getMyOrders, SupabaseOrder } from '../../services/orders.service';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function OrdersScreen() {
     const navigation = useNavigation<any>();
     const { showSuccess } = useToast();
     const { user } = useAuth();
+    const { addItem } = useCart();
     const [orders, setOrders] = useState<SupabaseOrder[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -144,9 +146,26 @@ export default function OrdersScreen() {
 
                                         <Pressable
                                             style={({ pressed }) => [styles.reorderButton, pressed && styles.buttonPressed]}
-                                            onPress={() => {
-                                                showSuccess(`Items from order #${order.id.slice(0, 8).toUpperCase()} added!`);
-                                                navigation.navigate('Cart');
+                                            onPress={async () => {
+                                                if (!order.items || order.items.length === 0) return;
+                                                let addedCount = 0;
+                                                for (const item of order.items) {
+                                                    try {
+                                                        if (item.product_id) {
+                                                            await addItem(item.product_id, item.quantity);
+                                                            addedCount++;
+                                                        }
+                                                    } catch (e) {
+                                                        // Skip items that no longer exist in the catalog
+                                                        console.warn('Could not reorder item:', item.product_name, e);
+                                                    }
+                                                }
+                                                if (addedCount > 0) {
+                                                    showSuccess(`${addedCount} item(s) added to cart!`);
+                                                    navigation.navigate('Cart');
+                                                } else {
+                                                    showSuccess('Sorry, these items are no longer available.');
+                                                }
                                             }}
                                         >
                                             <MaterialIcons name="refresh" size={22} color={theme.colors.white} />

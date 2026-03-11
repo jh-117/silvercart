@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, Pressable,
-    Image, LayoutAnimation, Platform, UIManager
+    Image, LayoutAnimation, Platform, UIManager, Linking, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -83,16 +83,19 @@ export default function SupportScreen() {
             detail: '1800-88-SILVER',
             color: '#1565C0',
             bg: '#E3F2FD',
-            onPress: () => showInfo('Calling 1800-88-SILVER...'),
+            onPress: () => Linking.openURL('tel:1800887458').catch(() => {
+                Alert.alert('Error', 'Unable to open the phone dialer. Your device may not support calling.');
+            }),
         },
         {
-            icon: 'chat-bubble-outline',
+            id: 'chat',
+            icon: 'chat',
             title: 'Live Chat',
             subtitle: 'Avg. reply: 2 min',
-            detail: 'Chat with an agent',
-            color: '#2e7d32',
-            bg: '#E8F5E9',
-            onPress: () => navigation.navigate('SupportForm'),
+            detail: 'Chat with our support team',
+            color: '#E65100', // Orange primary color
+            bg: '#FFF3E0',   // Light orange background color
+            onPress: () => navigation.navigate('TicketChat'),
         },
         {
             icon: 'email',
@@ -101,7 +104,9 @@ export default function SupportScreen() {
             detail: 'support@silvercart.my',
             color: '#6a1b9a',
             bg: '#F3E5F5',
-            onPress: () => showSuccess('Email app opening...'),
+            onPress: () => Linking.openURL('mailto:support@silvercart.my').catch(() => {
+                Alert.alert('Error', 'Unable to open your email app.');
+            }),
         },
         {
             icon: 'article',
@@ -364,7 +369,7 @@ const styles = StyleSheet.create({
         elevation: 1,
     },
     faqItemOpen: {
-        backgroundColor: `${theme.colors.primary}05`,
+            backgroundColor: '#F8FDF9',
     },
     faqHeader: {
         flexDirection: 'row',

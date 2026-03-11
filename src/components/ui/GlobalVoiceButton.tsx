@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Pressable, Animated, Keyboard, Platform, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
@@ -27,7 +27,27 @@ export default function GlobalVoiceButton() {
     }, []);
 
     // Conditions where we don't want the floating mic to show
-    if (!session || isAdmin || !hasCompletedSetup || isKeyboardVisible) {
+    const currentRouteName = useNavigationState((state: any) => {
+        if (!state) return 'Home'; // Assume Home on initial render to prevent flashing
+        const getActiveRouteName = (routeState: any): string => {
+            if (!routeState?.routes) return 'Home';
+            const route = routeState.routes[routeState.index];
+            if (route?.state) {
+                return getActiveRouteName(route.state);
+            }
+            return route?.name || 'Home';
+        };
+        return getActiveRouteName(state);
+    });
+
+    const isHiddenRoute = 
+        currentRouteName === 'Main' ||
+        currentRouteName.startsWith('Home') || 
+        currentRouteName.startsWith('Onboarding') || 
+        currentRouteName.startsWith('Tutorial') || 
+        currentRouteName.startsWith('VoiceSearch');
+
+    if (!session || isAdmin || !hasCompletedSetup || isKeyboardVisible || isHiddenRoute) {
         return null;
     }
 

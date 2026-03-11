@@ -16,6 +16,7 @@ interface CartContextType {
     loading: boolean;
     error: string | null;
     addItem: (productId: string, quantity?: number) => Promise<void>;
+    addCustomItem: (item: CartItem) => Promise<void>;
     removeItem: (productId: string) => Promise<void>;
     updateQuantity: (productId: string, quantity: number) => Promise<void>;
     clearCart: () => Promise<void>;
@@ -125,6 +126,38 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const addCustomItem = async (newItem: CartItem) => {
+        try {
+            setError(null);
+            if (newItem.quantity <= 0) {
+                throw new Error('Quantity must be greater than 0');
+            }
+
+            setItems(prevItems => {
+                const existingItemIndex = prevItems.findIndex(
+                    item => item.product.id === newItem.product.id
+                );
+
+                if (existingItemIndex !== -1) {
+                    // Update quantity if item already exists
+                    const updatedItems = [...prevItems];
+                    updatedItems[existingItemIndex] = {
+                        ...updatedItems[existingItemIndex],
+                        quantity: updatedItems[existingItemIndex].quantity + newItem.quantity
+                    };
+                    return updatedItems;
+                } else {
+                    // Add new item
+                    return [...prevItems, newItem];
+                }
+            });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to add custom item to cart';
+            setError(message);
+            throw new Error(message);
+        }
+    };
+
     const removeItem = async (productId: string) => {
         try {
             setError(null);
@@ -192,6 +225,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         loading,
         error,
         addItem,
+        addCustomItem,
         removeItem,
         updateQuantity,
         clearCart
