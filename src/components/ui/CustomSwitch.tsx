@@ -6,9 +6,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 interface CustomSwitchProps {
     value: boolean;
     onValueChange: (newValue: boolean) => void;
+    testID?: string;
 }
 
-export default function CustomSwitch({ value, onValueChange }: CustomSwitchProps) {
+export default function CustomSwitch({ value, onValueChange, testID }: CustomSwitchProps) {
     const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
     useEffect(() => {
@@ -47,7 +48,7 @@ export default function CustomSwitch({ value, onValueChange }: CustomSwitchProps
     });
 
     return (
-        <Pressable onPress={() => onValueChange(!value)} style={{ margin: 10 }}>
+        <Pressable testID={testID} onPress={() => onValueChange(!value)} style={{ margin: 10 }}>
             <Animated.View style={[styles.container, { backgroundColor, borderColor }]}>
                 <Animated.View style={[styles.knob, {
                     transform: [{ translateX }],

@@ -147,6 +147,7 @@ export default function AppSettingsScreen() {
                                 <Text style={styles.toggleSubtitle}>Get delivery updates on your lock screen</Text>
                             </View>
                             <CustomSwitch
+                                testID="switch-push-notifications"
                                 value={settings.push_notifications_enabled}
                                 onValueChange={handleNotificationToggle}
                             />

@@ -57,7 +57,7 @@ export default function GlobalVoiceButton() {
     const bottomPadding = Math.max(insets.bottom + 80, 100);
 
     return (
-        <View style={[styles.container, { bottom: bottomPadding }]} pointerEvents="box-none">
+        <View testID="global-voice-button" style={[styles.container, { bottom: bottomPadding }]} pointerEvents="box-none">
             <Pressable
                 style={({ pressed }) => [
                     styles.micButton,
