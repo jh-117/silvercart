@@ -16,6 +16,17 @@ const relationships = [
     { label: 'Other', value: 'other' },
 ];
 
+function normalizeMalaysiaPhone(rawPhone: string): string | null {
+    const cleaned = rawPhone.trim().replace(/[^\d+]/g, '');
+    if (!cleaned) return null;
+    if (cleaned.startsWith('+60')) return cleaned;
+    if (cleaned.startsWith('60')) return `+${cleaned}`;
+    if (cleaned.startsWith('0')) return `+6${cleaned}`;
+    // Fallback for numbers entered without leading 0, e.g. 11934...
+    if (/^\d+$/.test(cleaned)) return `+60${cleaned}`;
+    return null;
+}
+
 export default function AddTrustedContactScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
@@ -44,6 +55,11 @@ export default function AddTrustedContactScreen() {
             Alert.alert('Missing Info', 'Please fill in all required fields.');
             return;
         }
+        const normalizedPhone = normalizeMalaysiaPhone(phoneNumber);
+        if (!normalizedPhone) {
+            Alert.alert('Invalid Phone', 'Please enter a valid phone number.');
+            return;
+        }
         if (!user) return;
 
         setSaving(true);
@@ -65,7 +81,7 @@ export default function AddTrustedContactScreen() {
                 .insert({
                     user_id: user.id,
                     full_name: fullName,
-                    phone_number: phoneNumber,
+                    phone_number: normalizedPhone,
                     relationship,
                     notify_new_orders: notifyNewOrders,
                     notify_delivery: notifyDelivery,

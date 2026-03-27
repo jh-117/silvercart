@@ -83,15 +83,23 @@ export default function CheckoutReviewScreen() {
                         .select('*')
                         .eq('user_id', user.id);
 
-                    if (contacts) {
-                        contacts.forEach(contact => {
-                            emailService.sendOrderNotificationEmail(
-                                contact.full_name || contact.name, 
-                                contact.phone_number, 
-                                user.user_metadata?.full_name || 'Customer', 
-                                result.orderId!
-                            ).catch(console.error);
-                        });
+                    if (contacts && contacts.length > 0) {
+                        const smsResults = await Promise.allSettled(
+                            contacts.map((contact) =>
+                                emailService.sendOrderNotificationEmail(
+                                    contact.full_name || contact.name,
+                                    contact.phone_number,
+                                    user.user_metadata?.full_name || 'Customer',
+                                    result.orderId!
+                                )
+                            )
+                        );
+
+                        const failed = smsResults.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
+                        if (failed) {
+                            const message = failed.reason?.message || 'Trusted contact SMS could not be sent.';
+                            Alert.alert('Order placed', message);
+                        }
                     }
                 } catch (err) {
                     console.error('Failed to notify contacts', err);

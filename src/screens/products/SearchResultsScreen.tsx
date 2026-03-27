@@ -16,7 +16,13 @@ export default function SearchResultsScreen() {
     const route = useRoute<any>();
     const { category, query } = route.params || { category: 'All' };
 
-    const [selectedCategory, setSelectedCategory] = React.useState(category);
+    const normalizeCategory = React.useCallback((rawCategory?: string) => {
+        if (!rawCategory) return 'All';
+        const matched = categories.find(c => c.toLowerCase() === rawCategory.toLowerCase());
+        return matched || 'All';
+    }, []);
+
+    const [selectedCategory, setSelectedCategory] = React.useState(normalizeCategory(category));
     const [products, setProducts] = React.useState<Product[]>([]);
     const [loading, setLoading] = React.useState(true);
 
@@ -41,12 +47,8 @@ export default function SearchResultsScreen() {
     useFocusEffect(
         React.useCallback(() => {
             loadProducts();
-            if (category) {
-                // Ensure category properly matches our categories array format
-                const matchedCategory = categories.find(c => c.toLowerCase() === category.toLowerCase());
-                setSelectedCategory(matchedCategory || 'All');
-            }
-        }, [query, category])
+            setSelectedCategory(normalizeCategory(category));
+        }, [query, category, normalizeCategory])
     );
 
     const filteredProducts = React.useMemo(() => {

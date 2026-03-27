@@ -205,7 +205,7 @@ export default function VoiceSearchScreen() {
                                     toast.showWarning(`Could not find those products.`);
                                     speakAndSetStatus(`I couldn't find those items. Here are some alternatives.`);
                                     setTimeout(() => {
-                                        navigation.navigate('SearchResults', { query: command.items[0].product, category: 'all' });
+                                        navigation.navigate('SearchResults', { query: command.items[0].product, category: 'All' });
                                     }, 1500);
                                 }
                             }
