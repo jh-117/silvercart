@@ -1,0 +1,9 @@
+# Per-function configuration.
+# We disable JWT verification so the mobile app (anon key) can invoke `send-email`.
+# If you want to lock this down later, set verify_jwt=true and invoke with a user JWT.
+[functions.send-email]
+verify_jwt = false
+
+[functions.send-sms]
+verify_jwt = false
+
