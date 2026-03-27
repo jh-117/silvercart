@@ -6,6 +6,10 @@ import { theme } from '../../theme';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useToast } from '../../contexts/ToastProvider';
 import { useCart } from '../../contexts/CartContext';
+import { useFavorites } from '../../hooks/useFavorites';
+import { useReminders } from '../../hooks/useReminders';
+import AutoReorderModal from '../../components/modals/AutoReorderModal';
+import MedicationAlarmModal from '../../components/modals/MedicationAlarmModal';
 
 function StarRating({ rating = 4.5, reviews = 128 }: { rating?: number; reviews?: number }) {
     const fullStars = Math.floor(rating);
@@ -50,6 +54,7 @@ export default function ProductDetailsScreen() {
         inStock = true,
         description,
         expiryDate,
+        category,
     } = route.params || {};
 
     const formatPrice = (p: any) => {
@@ -66,6 +71,20 @@ export default function ProductDetailsScreen() {
     const originalPrice = formatPrice(rawOriginalPrice);
 
     const [quantity, setQuantity] = React.useState(1);
+    const [showAutoReorderModal, setShowAutoReorderModal] = React.useState(false);
+    const [showMedAlarmModal, setShowMedAlarmModal] = React.useState(false);
+    
+    // Hooks
+    const { isFavorite, toggleFavorite } = useFavorites();
+    const { addReminder } = useReminders();
+    
+    const isFav = productId ? isFavorite(productId) : false;
+
+    const handleFavorite = async () => {
+        if (!productId) return;
+        await toggleFavorite(productId);
+        showSuccess(isFav ? 'Removed from favorites' : 'Added to favorites!');
+    };
 
     const handleIncrement = () => setQuantity(q => q + 1);
     const handleDecrement = () => setQuantity(q => Math.max(1, q - 1));
@@ -95,9 +114,18 @@ export default function ProductDetailsScreen() {
                         <MaterialIcons name="arrow-back" size={24} color={theme.colors.primary} />
                     </Pressable>
                     <Text style={styles.headerTitle}>Product Details</Text>
-                    <Pressable onPress={() => navigation.navigate('Cart')} style={styles.iconButton}>
-                        <MaterialIcons name="shopping-cart" size={24} color={theme.colors.primary} />
-                    </Pressable>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <Pressable onPress={handleFavorite} style={styles.iconButton}>
+                            <MaterialIcons 
+                                name={isFav ? "favorite" : "favorite-border"} 
+                                size={24} 
+                                color={isFav ? "#e53e3e" : theme.colors.primary} 
+                            />
+                        </Pressable>
+                        <Pressable onPress={() => navigation.navigate('Cart')} style={styles.iconButton}>
+                            <MaterialIcons name="shopping-cart" size={24} color={theme.colors.primary} />
+                        </Pressable>
+                    </View>
                 </View>
 
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -187,23 +215,41 @@ export default function ProductDetailsScreen() {
                                 </View>
                             </View>
                         )}
-
-                        {/* Buy Again / Repeat Order */}
+                        {/* Auto-Reorder — all products */}
                         <View style={styles.repeatOrderCard}>
                             <View style={styles.repeatOrderLeft}>
                                 <MaterialIcons name="autorenew" size={24} color={theme.colors.primary} />
-                                <View>
+                                <View style={{ flex: 1 }}>
                                     <Text style={styles.repeatOrderTitle}>Set Up Auto-Reorder</Text>
-                                    <Text style={styles.repeatOrderSubtitle}>Never run out — we'll remind you</Text>
+                                    <Text style={styles.repeatOrderSubtitle}>Never run out — AI picks the schedule</Text>
                                 </View>
                             </View>
                             <Pressable
                                 style={({ pressed }) => [styles.repeatOrderBtn, pressed && { opacity: 0.8 }]}
-                                onPress={() => showSuccess("Auto-reorder set up! We'll remind you in 30 days.")}
+                                onPress={() => setShowAutoReorderModal(true)}
                             >
                                 <Text style={styles.repeatOrderBtnText}>Set Up</Text>
                             </Pressable>
                         </View>
+
+                        {/* Daily Alarm — pharmacy only */}
+                        {category?.toLowerCase() === 'pharmacy' && (
+                            <View style={[styles.repeatOrderCard, { backgroundColor: '#E3F2FD', borderColor: '#BBDEFB', marginTop: 8 }]}>
+                                <View style={styles.repeatOrderLeft}>
+                                    <MaterialIcons name="alarm" size={24} color="#1565C0" />
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.repeatOrderTitle, { color: '#1565C0' }]}>Daily Medication Alarm</Text>
+                                        <Text style={[styles.repeatOrderSubtitle, { color: '#1976D2' }]}>AI sets the best times for you</Text>
+                                    </View>
+                                </View>
+                                <Pressable
+                                    style={({ pressed }) => [[styles.repeatOrderBtn, { backgroundColor: '#1565C0' }], pressed && { opacity: 0.8 }]}
+                                    onPress={() => setShowMedAlarmModal(true)}
+                                >
+                                    <Text style={styles.repeatOrderBtnText}>Set Alarm</Text>
+                                </Pressable>
+                            </View>
+                        )}
 
                         {/* Quantity Selector */}
                         <Text style={styles.sectionTitle}>Select Quantity</Text>
@@ -244,6 +290,22 @@ export default function ProductDetailsScreen() {
                     <Text style={styles.addToCartText}>{inStock ? 'Add to Cart' : 'Out of Stock'}</Text>
                 </Pressable>
             </View>
+
+            {/* Modals */}
+            <AutoReorderModal
+                visible={showAutoReorderModal}
+                onClose={() => setShowAutoReorderModal(false)}
+                productId={productId ?? ''}
+                productName={productName}
+                category={category ?? 'grocery'}
+            />
+            <MedicationAlarmModal
+                visible={showMedAlarmModal}
+                onClose={() => setShowMedAlarmModal(false)}
+                productId={productId ?? ''}
+                productName={productName}
+                onSuccess={() => showSuccess('Medication alarm set! You\'ll be notified daily.')}
+            />
         </View >
     );
 }

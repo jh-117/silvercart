@@ -6,17 +6,36 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../hooks/useAuth';
 import { placeOrder } from '../../services/orders.service';
+import { emailService } from '../../services/emailService';
+import { supabase } from '../../services/supabase';
 
 export default function CheckoutReviewScreen() {
     const navigation = useNavigation<any>();
+    const route = useRoute<any>();
     const { items, subtotal, deliveryFee, total, clearCart } = useCart();
     const { user } = useAuth();
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [placing, setPlacing] = useState(false);
+
+    const delivery_address = route.params?.delivery_address || '123 Elderly Care Lane, Section 5, Petaling Jaya, 46000 Selangor';
+    const payment_method = route.params?.payment_method || 'cod';
+
+    const getPaymentDisplay = () => {
+        switch (payment_method) {
+            case 'online':
+                return { name: 'Online Banking', icon: 'account-balance', detail: 'Secure FPX transfer' };
+            case 'ewallet':
+                return { name: 'E-Wallet', icon: 'account-balance-wallet', detail: 'Touch \'n Go / GrabPay' };
+            case 'cod':
+            default:
+                return { name: 'Cash on Delivery', icon: 'payments', detail: 'Pay upon receipt' };
+        }
+    };
+    const paymentDisplay = getPaymentDisplay();
 
     const handlePlaceOrder = async () => {
         if (!isConfirmed || placing) return;
@@ -45,12 +64,39 @@ export default function CheckoutReviewScreen() {
                 delivery_fee: deliveryFee,
                 total,
                 status: 'pending',
-                payment_method: 'card',
-                delivery_address: '123 Elderly Care Lane, Section 5, Petaling Jaya, 46000 Selangor',
+                payment_method,
+                delivery_address,
             });
 
             if (result.success && result.orderId) {
                 await clearCart();
+
+                // Fire emails in background (mocked)
+                if (user.email) {
+                    emailService.sendReceiptEmail(user.email, result.orderId, total).catch(console.error);
+                }
+
+                // Notify trusted contacts
+                try {
+                    const { data: contacts } = await supabase
+                        .from('trusted_contacts')
+                        .select('*')
+                        .eq('user_id', user.id);
+
+                    if (contacts) {
+                        contacts.forEach(contact => {
+                            emailService.sendOrderNotificationEmail(
+                                contact.full_name || contact.name, 
+                                contact.phone_number, 
+                                user.user_metadata?.full_name || 'Customer', 
+                                result.orderId!
+                            ).catch(console.error);
+                        });
+                    }
+                } catch (err) {
+                    console.error('Failed to notify contacts', err);
+                }
+
                 navigation.navigate('OrderSuccess', { orderId: result.orderId });
             } else {
                 Alert.alert('Order Failed', result.error ?? 'Failed to place order. Please try again.');
@@ -96,9 +142,7 @@ export default function CheckoutReviewScreen() {
                     </View>
                     <View style={styles.cardContent}>
                         <Text style={styles.cardName}>{user?.user_metadata?.full_name ?? 'Customer'}</Text>
-                        <Text style={styles.cardAddress}>
-                            123 Elderly Care Lane, Section 5,{'\n'}Petaling Jaya, 46000 Selangor
-                        </Text>
+                        <Text style={styles.cardAddress}>{delivery_address}</Text>
                     </View>
                 </View>
 
@@ -116,11 +160,11 @@ export default function CheckoutReviewScreen() {
                     <View style={styles.cardContent}>
                         <View style={styles.paymentRow}>
                             <View style={styles.paymentIcon}>
-                                <MaterialIcons name="credit-card" size={30} color={theme.colors.textPrimary} />
+                                <MaterialIcons name={paymentDisplay.icon as any} size={30} color={theme.colors.textPrimary} />
                             </View>
                             <View>
-                                <Text style={styles.cardName}>Visa ending in 4242</Text>
-                                <Text style={styles.cardExpiry}>Expires 12/26</Text>
+                                <Text style={styles.cardName}>{paymentDisplay.name}</Text>
+                                <Text style={styles.cardExpiry}>{paymentDisplay.detail}</Text>
                             </View>
                         </View>
                     </View>

@@ -68,6 +68,7 @@ export default function CartScreen() {
                                     price: ci.product.price,
                                     image: ci.product.image_url,
                                     description: ci.product.description,
+                                    category: ci.product.category,
                                 })}
                             >
                                 <View style={styles.itemHeader}>

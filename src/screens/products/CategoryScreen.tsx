@@ -59,6 +59,7 @@ export default function CategoryScreen() {
                 rating: 4.5,
                 reviews: Math.floor(Math.random() * 200) + 50,
                 inStock: item.stock_status === 'in_stock',
+                category: item.category,
             })}
         >
             <Image source={{ uri: item.image_url }} style={styles.productImage} />

@@ -6,6 +6,18 @@ import { theme } from '../../theme';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
+import * as Notifications from 'expo-notifications';
+import { useToast } from '../../hooks/useToast';
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
 
 interface TrustedContact {
     id: string;
@@ -17,6 +29,7 @@ interface TrustedContact {
 export default function TrustedContactScreen() {
     const navigation = useNavigation<any>();
     const { user } = useContext(AuthContext);
+    const toast = useToast();
     const [contacts, setContacts] = useState<TrustedContact[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -47,6 +60,25 @@ export default function TrustedContactScreen() {
                 }
             }
         ]);
+    };
+
+    const handleTestNotification = async (contactName: string) => {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Please enable notifications in your phone settings to test this feature.');
+            return;
+        }
+
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: 'SilverCart Test Alert 🚨',
+                body: `This is a mock. In reality, ${contactName} would receive this exact push notification on their device.`,
+                sound: true,
+            },
+            trigger: null, // send immediately
+        });
+
+        toast.showSuccess(`Test push notification dispatched!`);
     };
 
     return (
@@ -141,7 +173,7 @@ export default function TrustedContactScreen() {
 
                                     <Pressable
                                         style={({ pressed }) => [styles.testNotificationButton, pressed && styles.buttonPressedOpacity]}
-                                        onPress={() => alert(`Test notification sent to ${contact.phone_number}`)}
+                                        onPress={() => handleTestNotification(contact.full_name)}
                                     >
                                         <MaterialIcons name="notifications-active" size={24} color={theme.colors.primary} />
                                         <Text style={styles.testNotificationText}>Test Notification</Text>

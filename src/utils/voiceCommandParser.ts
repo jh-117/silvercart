@@ -2,12 +2,13 @@
 // Parses voice input and determines navigation or action intent
 
 export interface VoiceCommand {
-    intent: 'search' | 'navigate' | 'cart' | 'orders' | 'profile' | 'checkout' | 'unknown';
+    intent: 'search' | 'navigate' | 'cart' | 'orders' | 'profile' | 'checkout' | 'support' | 'call_contact' | 'add_to_cart' | 'remove_from_cart' | 'unknown';
     params?: {
         query?: string;
         screen?: string;
         category?: string;
     };
+    contactName?: string;
     confidence: number;
 }
 
@@ -19,9 +20,34 @@ const PROFILE_KEYWORDS = ['profile', 'account', 'settings', 'my profile'];
 const PHARMACY_KEYWORDS = ['medicine', 'medication', 'pharmacy', 'drug', 'pills', 'tablet'];
 const GROCERY_KEYWORDS = ['food', 'grocery', 'groceries', 'vegetables', 'fruits'];
 const CHECKOUT_KEYWORDS = ['checkout', 'pay', 'payment', 'buy now'];
+const SUPPORT_KEYWORDS = ['support', 'help', 'assist', 'chat'];
+const CALL_KEYWORDS = ['call', 'phone', 'dial'];
 
 export function parseVoiceCommand(transcript: string): VoiceCommand {
     const lowerTranscript = transcript.toLowerCase().trim();
+
+    // Check for call contact intent (e.g. "call my son", "call tester")
+    if (CALL_KEYWORDS.some(keyword => lowerTranscript.startsWith(keyword) || lowerTranscript.includes(keyword))) {
+        let contactName = extractSearchQuery(lowerTranscript, CALL_KEYWORDS);
+        if (contactName) {
+            // Remove conversational fluff like "my"
+            contactName = contactName.replace(/^my\s+/i, '').trim();
+            return {
+                intent: 'call_contact',
+                contactName: contactName,
+                confidence: 0.95
+            };
+        }
+    }
+
+    // Check for support intent
+    if (SUPPORT_KEYWORDS.some(keyword => lowerTranscript.includes(keyword))) {
+        return {
+            intent: 'support',
+            params: { screen: 'Support' },
+            confidence: 0.9
+        };
+    }
 
     // Check for checkout intent
     if (CHECKOUT_KEYWORDS.some(keyword => lowerTranscript.includes(keyword))) {

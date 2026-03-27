@@ -18,6 +18,30 @@ import { ToastProvider } from './src/contexts/ToastProvider';
 import { CartProvider } from './src/contexts/CartContext';
 import { OrderProvider } from './src/contexts/OrderContext';
 import RootNavigator from './src/navigation/RootNavigator';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+
+// --- Native Notification Handler ---
+// This ensures scheduled notifications display properly even in background/killed state
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
+
+// Create Android notification channel for reminders
+if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('silvercart-reminders', {
+        name: 'SilverCart Reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#1a6b3c',
+        sound: 'default',
+    });
+}
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();

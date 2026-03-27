@@ -41,6 +41,8 @@ import PrivacyPolicyScreen from '../screens/profile/PrivacyPolicyScreen';
 import SupportFormScreen from '../screens/profile/SupportFormScreen';
 import SupportTicketsScreen from '../screens/profile/SupportTicketsScreen';
 import TicketChatScreen from '../screens/profile/TicketChatScreen';
+import FavoritesScreen from '../screens/profile/FavoritesScreen';
+import RemindersScreen from '../screens/profile/RemindersScreen';
 
 // Auth
 import EmailVerificationScreen from '../screens/auth/EmailVerificationScreen';
@@ -50,6 +52,7 @@ import BiometricUnlockScreen from '../screens/auth/BiometricUnlockScreen';
 // Special
 import ErrorScreen from '../screens/special/ErrorScreen';
 import VoiceSearchScreen from '../screens/voice/VoiceSearchScreen';
+import VoiceCommandsHelpScreen from '../screens/voice/VoiceCommandsHelpScreen';
 import CategoryScreen from '../screens/products/CategoryScreen';
 
 import GlobalVoiceButton from '../components/ui/GlobalVoiceButton';
@@ -139,6 +142,8 @@ export default function RootNavigator() {
                             <Stack.Screen name="CancellationPolicy" component={CancellationPolicyScreen} />
 
                             {/* Profile Screens */}
+                            <Stack.Screen name="Favorites" component={FavoritesScreen} />
+                            <Stack.Screen name="Reminders" component={RemindersScreen} />
                             <Stack.Screen name="TrustedContact" component={TrustedContactScreen} />
                             <Stack.Screen name="AddTrustedContact" component={AddTrustedContactScreen} />
                             <Stack.Screen name="EditTrustedContact" component={EditTrustedContactScreen} />
@@ -164,6 +169,7 @@ export default function RootNavigator() {
                 {/* Global Screens - accessible regardless of auth state */}
                 <Stack.Screen name="Error" component={ErrorScreen} />
                 <Stack.Screen name="VoiceSearch" component={VoiceSearchScreen} options={{ presentation: 'modal' }} />
+                <Stack.Screen name="VoiceCommandsHelp" component={VoiceCommandsHelpScreen} options={{ presentation: 'modal' }} />
                 <Stack.Screen name="Category" component={CategoryScreen} />
             </Stack.Navigator>
 

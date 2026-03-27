@@ -127,6 +127,11 @@ export default function VoiceSearchScreen() {
                                 category: command.params.category
                             });
                         }, 500);
+                    } else if (command.params?.screen) {
+                        speakAndSetStatus(`Opening ${command.params.screen}...`);
+                        setTimeout(() => {
+                            navigation.navigate(command.params.screen);
+                        }, 500);
                     }
                     break;
 
@@ -140,7 +145,7 @@ export default function VoiceSearchScreen() {
                 case 'orders':
                     speakAndSetStatus('Opening your orders...');
                     setTimeout(() => {
-                        navigation.navigate('Orders');
+                        navigation.navigate('OrderHistory');
                     }, 500);
                     break;
 
@@ -152,34 +157,85 @@ export default function VoiceSearchScreen() {
                     break;
 
                 case 'add_to_cart':
-                    if (command.product) {
+                    if (command.items && command.items.length > 0) {
                         try {
                             const { data: userData } = await supabase.auth.getUser();
-                            if (userData.user && command.products && command.products.length > 0) {
-                                // Add first match to cart
-                                const product = command.products[0];
-                                await supabase.from('cart_items').upsert({
-                                    user_id: userData.user.id,
-                                    product_id: product.id,
-                                    quantity: command.quantity || 1
-                                }, { onConflict: 'user_id,product_id' });
+                            if (userData.user) {
+                                let addedCount = 0;
+                                let notFoundNames: string[] = [];
 
-                                toast.showSuccess(`Added ${product.name} to cart.`);
-                                speakAndSetStatus(`Added ${product.name} to your cart.`);
-                                setTimeout(() => {
-                                    navigation.navigate('Cart');
-                                }, 1500);
-                            } else {
-                                toast.showWarning(`Could not find product: ${command.product}`);
-                                speakAndSetStatus(`I couldn't find ${command.product}, here are some alternatives.`);
-                                setTimeout(() => {
-                                    navigation.navigate('SearchResults', { query: command.product, category: 'all' });
-                                }, 1500);
+                                for (const item of command.items) {
+                                    if (item.products && item.products.length > 0) {
+                                        const product = item.products[0];
+                                        await supabase.from('cart_items').upsert({
+                                            user_id: userData.user.id,
+                                            product_id: product.id,
+                                            quantity: item.quantity || 1
+                                        }, { onConflict: 'user_id,product_id' });
+                                        addedCount++;
+                                    } else {
+                                        notFoundNames.push(item.product);
+                                    }
+                                }
+
+                                if (addedCount > 0) {
+                                    if (notFoundNames.length > 0) {
+                                        const omitted = notFoundNames.join(' and ');
+                                        toast.showSuccess(`Added ${addedCount} item(s). Couldn't find: ${omitted}`);
+                                        speakAndSetStatus(`Added some items to your cart, but I couldn't find ${omitted}.`);
+                                    } else {
+                                        toast.showSuccess(`Added ${addedCount} item(s) to cart.`);
+                                        speakAndSetStatus(command.response || `Added everything to your cart.`);
+                                    }
+                                    setTimeout(() => {
+                                        navigation.navigate('Cart');
+                                    }, 1500);
+                                } else {
+                                    toast.showWarning(`Could not find those products.`);
+                                    speakAndSetStatus(`I couldn't find those items. Here are some alternatives.`);
+                                    setTimeout(() => {
+                                        navigation.navigate('SearchResults', { query: command.items[0].product, category: 'all' });
+                                    }, 1500);
+                                }
                             }
                         } catch (err) {
                             console.error('Cart add error', err);
                             toast.showError('Failed to add to cart');
                             speakAndSetStatus('Sorry, I failed to add that to your cart.');
+                        }
+                    }
+                    break;
+
+                case 'remove_from_cart':
+                    if (command.items && command.items.length > 0) {
+                        try {
+                            const { data: userData } = await supabase.auth.getUser();
+                            if (userData.user) {
+                                let removedCount = 0;
+                                for (const item of command.items) {
+                                    if (item.products && item.products.length > 0) {
+                                        const product = item.products[0];
+                                        await supabase.from('cart_items').delete()
+                                            .eq('user_id', userData.user.id)
+                                            .eq('product_id', product.id);
+                                        removedCount++;
+                                    }
+                                }
+
+                                if (removedCount > 0) {
+                                    toast.showSuccess(`Removed ${removedCount} item(s) from cart.`);
+                                    speakAndSetStatus(`Done. I've removed it from your cart.`);
+                                } else {
+                                    toast.showWarning(`Could not find those products in your cart.`);
+                                    speakAndSetStatus(`I couldn't find those to remove.`);
+                                }
+                                setTimeout(() => {
+                                    navigation.navigate('Cart');
+                                }, 1500);
+                            }
+                        } catch (err) {
+                            console.error('Cart remove error', err);
+                            speakAndSetStatus('Sorry, I failed to remove that.');
                         }
                     }
                     break;
@@ -208,10 +264,10 @@ export default function VoiceSearchScreen() {
                                     .from('trusted_contacts')
                                     .select('*')
                                     .eq('user_id', userData.user.id)
-                                    .ilike('name', `%${command.contactName}%`);
+                                    .ilike('full_name', `%${command.contactName}%`);
                                     
                                 if (contacts && contacts.length > 0) {
-                                    speakAndSetStatus(`Calling ${contacts[0].name}...`);
+                                    speakAndSetStatus(`Calling ${contacts[0].full_name}...`);
                                     setTimeout(() => {
                                         Linking.openURL(`tel:${contacts[0].phone_number}`).catch(() => {
                                             toast.showError('Unable to open phone dialer');
@@ -308,48 +364,15 @@ export default function VoiceSearchScreen() {
                 {/* Toggleable Help Section */}
                 <Pressable
                     style={styles.helpToggleButton}
-                    onPress={() => setShowHelp(!showHelp)}
+                    onPress={() => {
+                        // Navigate to our new dedicated Help screen
+                        navigation.navigate('VoiceCommandsHelp');
+                    }}
                 >
                     <MaterialIcons name="info-outline" size={24} color={theme.colors.white} />
                     <Text style={styles.helpToggleText}>What can I say?</Text>
-                    <MaterialIcons name={showHelp ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color={theme.colors.white} />
+                    <MaterialIcons name="arrow-forward-ios" size={16} color={theme.colors.white} />
                 </Pressable>
-
-                {showHelp && (
-                    <ScrollView
-                        style={styles.fullHintsContainer}
-                        contentContainerStyle={{ paddingBottom: 40 }}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <Text style={styles.categoryTitle}>Shopping</Text>
-                        <Text style={styles.hintText}>• "Search for milk"</Text>
-                        <Text style={styles.hintText}>• "I need paracetamol"</Text>
-                        <Text style={styles.hintText}>• "Add bread to cart"</Text>
-
-                        <Text style={[styles.categoryTitle, { marginTop: 12 }]}>Cart & Checkout</Text>
-                        <Text style={styles.hintText}>• "Show my cart"</Text>
-                        <Text style={styles.hintText}>• "Checkout"</Text>
-
-                        <Text style={[styles.categoryTitle, { marginTop: 12 }]}>Navigation</Text>
-                        <Text style={styles.hintText}>• "Where are my orders?"</Text>
-                        <Text style={styles.hintText}>• "Go to my profile"</Text>
-                        <Text style={styles.hintText}>• "Show me pharmacy"</Text>
-                    </ScrollView>
-                )}
-                
-                {!showHelp && (
-                    <View style={styles.hintsContainer}>
-                        <Text style={styles.hintsTitle}>Try saying:</Text>
-                        <View style={styles.hintItem}>
-                            <MaterialIcons name="search" size={20} color="rgba(255,255,255,0.7)" />
-                            <Text style={styles.hintText}>"Search for milk"</Text>
-                        </View>
-                        <View style={styles.hintItem}>
-                            <MaterialIcons name="shopping-cart" size={20} color="rgba(255,255,255,0.7)" />
-                            <Text style={styles.hintText}>"Show my cart"</Text>
-                        </View>
-                    </View>
-                )}
             </View>
         </SafeAreaView>
     );

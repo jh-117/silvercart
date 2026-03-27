@@ -1,0 +1,189 @@
+﻿node.exe : ΓùÅ Validation Warning:
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓùÅ Validation Warning::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+  Unknown option "testPathPattern" with value ".*\\.test\\.[jt]sx?$" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+ΓùÅ Validation Warning:
+
+  Unknown option "setupFilesAfterFramework" with value [] was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+ΓùÅ Validation Warning:
+
+  Unknown option "testPathPattern" with value ".*\\.test\\.[jt]sx?$" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+ΓùÅ Validation Warning:
+
+  Unknown option "setupFilesAfterFramework" with value [] was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+FAIL src/__tests__/aiService.test.ts
+  ΓùÅ Console
+
+    console.log
+      [AI Service] No Gemini API Key or empty transcript, falling back to basic parser.
+
+      at log (src/services/aiService.ts:27:17)
+
+    console.log
+      [AI Service] No Gemini API Key or empty transcript, falling back to basic parser.
+
+      at log (src/services/aiService.ts:27:17)
+
+  ΓùÅ aiService ΓÇ║ should correctly map a contact calling intent from Gemini
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "call_contact"
+    Received: "search"
+
+    [0m [90m 38 |[39m         [36mconst[39m result [33m=[39m [36mawait[39m processVoiceCommand([32m'Call my 
+son'[39m)[33m;[39m
+     [90m 39 |[39m         
+    [31m[1m>[22m[39m[90m 40 |[39m         
+expect(result[33m.[39mintent)[33m.[39mtoBe([32m'call_contact'[39m)[33m;[39m
+     [90m    |[39m                               [31m[1m^[22m[39m
+     [90m 41 |[39m         expect(result[33m.[39mcontactName)[33m.[39mtoBe([32m'son'[39m)[33m;[39m
+     [90m 42 |[39m         expect(result[33m.[39mresponse)[33m.[39mtoBe([32m'Calling your son'[39m)[33m;[39m
+     [90m 43 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (src/__tests__/aiService.test.ts:40:31)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+FAIL src/__tests__/GlobalVoiceButton.test.tsx
+  ΓùÅ GlobalVoiceButton ΓÇ║ should render on the Cart screen
+
+    No safe area value available. Make sure you are rendering `<SafeAreaProvider>` at the top of your app.
+
+    [0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mGlobalVoiceButton[39m() {
+     [90m 10 |[39m     [36mconst[39m navigation [33m=[39m 
+useNavigation[33m<[39m[33many[39m[33m>[39m()[33m;[39m
+    [31m[1m>[22m[39m[90m 11 |[39m     [36mconst[39m insets [33m=[39m useSafeAreaInsets()[33m;[39m
+     [90m    |[39m                                     [31m[1m^[22m[39m
+     [90m 12 |[39m     [36mconst[39m { session[33m,[39m isAdmin[33m,[39m hasCompletedSetup } [33m=[39m 
+useAuth()[33m;[39m
+     [90m 13 |[39m
+     [90m 14 |[39m     [36mconst[39m [isKeyboardVisible[33m,[39m setKeyboardVisible] [33m=[39m 
+useState([36mfalse[39m)[33m;[39m[0m
+
+      at useSafeAreaInsets (node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx:152:11)
+      at GlobalVoiceButton (src/components/ui/GlobalVoiceButton.tsx:11:37)
+      at Object.react-stack-bottom-frame 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13976:20)
+      at renderWithHooks (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2866:22)
+      at updateFunctionComponent (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6006:19)
+      at beginWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7474:18)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at performUnitOfWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10972:22)
+      at workLoopSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10816:41)
+      at renderRootSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10797:11)
+      at performWorkOnRoot (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10384:39)
+      at performWorkOnRootViaSchedulerTask 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2094:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at Object.<anonymous> (src/__tests__/GlobalVoiceButton.test.tsx:26:39)
+
+  ΓùÅ GlobalVoiceButton ΓÇ║ should hide (return null) on the Home screen
+
+    No safe area value available. Make sure you are rendering `<SafeAreaProvider>` at the top of your app.
+
+    [0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mGlobalVoiceButton[39m() {
+     [90m 10 |[39m     [36mconst[39m navigation [33m=[39m 
+useNavigation[33m<[39m[33many[39m[33m>[39m()[33m;[39m
+    [31m[1m>[22m[39m[90m 11 |[39m     [36mconst[39m insets [33m=[39m useSafeAreaInsets()[33m;[39m
+     [90m    |[39m                                     [31m[1m^[22m[39m
+     [90m 12 |[39m     [36mconst[39m { session[33m,[39m isAdmin[33m,[39m hasCompletedSetup } [33m=[39m 
+useAuth()[33m;[39m
+     [90m 13 |[39m
+     [90m 14 |[39m     [36mconst[39m [isKeyboardVisible[33m,[39m setKeyboardVisible] [33m=[39m 
+useState([36mfalse[39m)[33m;[39m[0m
+
+      at useSafeAreaInsets (node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx:152:11)
+      at GlobalVoiceButton (src/components/ui/GlobalVoiceButton.tsx:11:37)
+      at Object.react-stack-bottom-frame 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13976:20)
+      at renderWithHooks (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2866:22)
+      at updateFunctionComponent (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6006:19)
+      at beginWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7474:18)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at performUnitOfWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10972:22)
+      at workLoopSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10816:41)
+      at renderRootSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10797:11)
+      at performWorkOnRoot (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10384:39)
+      at performWorkOnRootViaSchedulerTask 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2094:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at Object.<anonymous> (src/__tests__/GlobalVoiceButton.test.tsx:32:41)
+
+  ΓùÅ GlobalVoiceButton ΓÇ║ should hide (return null) on the Onboarding screen
+
+    No safe area value available. Make sure you are rendering `<SafeAreaProvider>` at the top of your app.
+
+    [0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mGlobalVoiceButton[39m() {
+     [90m 10 |[39m     [36mconst[39m navigation [33m=[39m 
+useNavigation[33m<[39m[33many[39m[33m>[39m()[33m;[39m
+    [31m[1m>[22m[39m[90m 11 |[39m     [36mconst[39m insets [33m=[39m useSafeAreaInsets()[33m;[39m
+     [90m    |[39m                                     [31m[1m^[22m[39m
+     [90m 12 |[39m     [36mconst[39m { session[33m,[39m isAdmin[33m,[39m hasCompletedSetup } [33m=[39m 
+useAuth()[33m;[39m
+     [90m 13 |[39m
+     [90m 14 |[39m     [36mconst[39m [isKeyboardVisible[33m,[39m setKeyboardVisible] [33m=[39m 
+useState([36mfalse[39m)[33m;[39m[0m
+
+      at useSafeAreaInsets (node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx:152:11)
+      at GlobalVoiceButton (src/components/ui/GlobalVoiceButton.tsx:11:37)
+      at Object.react-stack-bottom-frame 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13976:20)
+      at renderWithHooks (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2866:22)
+      at updateFunctionComponent (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6006:19)
+      at beginWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7474:18)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at performUnitOfWork (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10972:22)
+      at workLoopSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10816:41)
+      at renderRootSync (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10797:11)
+      at performWorkOnRoot (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10384:39)
+      at performWorkOnRootViaSchedulerTask 
+(node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2094:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at Object.<anonymous> (src/__tests__/GlobalVoiceButton.test.tsx:38:41)
+
+Test Suites: 2 failed, 2 total
+Tests:       4 failed, 1 passed, 5 total
+Snapshots:   0 total
+Time:        10.428 s
+Ran all test suites matching /src\\__tests__\\GlobalVoiceButton.test.tsx|src\\__tests__\\aiService.test.ts/i.

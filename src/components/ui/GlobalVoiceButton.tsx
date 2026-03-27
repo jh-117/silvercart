@@ -54,7 +54,7 @@ export default function GlobalVoiceButton() {
     // Get bottom padding, account for standard tab bar height if we are inside a tab screen
     // On screens without the tab bar, we just use the safe area inset bottom.
     // Assuming standard tab bar height is roughly 64
-    const bottomPadding = Math.max(insets.bottom + 80, 100);
+    const bottomPadding = Math.max(insets.bottom + 160, 180);
 
     return (
         <View testID="global-voice-button" style={[styles.container, { bottom: bottomPadding }]} pointerEvents="box-none">

@@ -1,12 +1,12 @@
 # Product Requirements Document (PRD) v2.0
 ## SilverCart - Voice-Enabled E-Commerce for Malaysian Elderly
 
-**Version:** 2.0 (UPDATED)  
-**Date:** February 7, 2026  
-**Previous Version:** 1.0 (January 16, 2026)  
+**Version:** 3.0 (UPDATED)  
+**Date:** March 22, 2026  
+**Previous Version:** 2.0 (February 7, 2026)  
 **Project Type:** Final Year Project (Individual)  
 **Due Date:** May 8, 2026  
-**Status:** Phase 2 (Setup & Foundation) - Week 4 of 16
+**Status:** Phase 4 (Polish & Testing) - Week 10 of 16
 
 ---
 
@@ -35,7 +35,7 @@ SilverCart is a voice-enabled mobile e-commerce application designed specificall
 
 **Business Model:** Direct retail store with online presence (NOT a marketplace like Shopee/Lazada)
 
-**Current Status:** Phase 2 (Setup & Foundation) - Database configured, design system locked, SDK 54 migration complete.
+**Current Status:** Phase 4 (Polish & Testing) - Database configured, design system locked, core features built, Admin Panel built, Map integration completed.
 
 ### 1.2 Problem Statement
 Current e-commerce platforms (Shopee, Lazada, Grab) are not optimized for elderly users who face:
@@ -400,8 +400,15 @@ A React Native mobile application (Expo SDK 54 with New Architecture) operating 
 - **NEW:** RLS policies check `is_admin()` function for data access
 - Future: Role-based access (store manager, inventory clerk, support staff)
 
-### 3.2 Phase 2 Features (Post-MVP / If Time Permits)
-- Voice output (text-to-speech)
+### 3.2 Phase 2/3 Features (Post-MVP / Newly Added in March)
+- ✅ Voice AI calling Trusted Contacts directly (dialer integration)
+- ✅ Biometric onboarding lock (SecureStore enforcement)
+- ✅ Quick Reorder cart logic (from Order History)
+- ✅ Dynamic Global Mic visibility logic
+- ✅ Local push notifications for order/trust contact updates
+- ✅ Map Location autocomplete (WebView + Leaflet + Geoapify)
+- ✅ Admin Panel (Dashboard, Orders, Customer Support)
+- ✅ Voice output (text-to-speech)
 - Medication reminders
 - Favorite/frequently ordered items
 - Product recommendations
@@ -410,9 +417,6 @@ A React Native mobile application (Expo SDK 54 with New Architecture) operating 
 - Real payment integration (Stripe/Razorpay)
 - Actual delivery partner integration (Lalamove API)
 - Real-time order tracking with GPS
-- Customer management screen (admin)
-- Analytics dashboard (admin)
-- Notification templates management (admin)
 - Multi-admin role management
 
 ---
@@ -426,7 +430,7 @@ A React Native mobile application (Expo SDK 54 with New Architecture) operating 
 - **Language:** JavaScript/TypeScript
 - **UI Library:** React Native Paper (Material Design)
 - **Navigation:** React Navigation v6
-- **State Management:** React Context API / Zustand
+- **State Management:** React Context API (Strictly Context)
 - **Voice Recognition:** expo-speech (SDK 54 compatible version) **NEW**
 - **Animations:** react-native-reanimated v2 (NOT Animated API) **NEW**
 - **Gesture Handling:** react-native-gesture-handler (mandatory) **NEW**

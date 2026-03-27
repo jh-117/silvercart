@@ -10,6 +10,8 @@ import { authService } from '../../services/auth.service';
 
 const menuItems = [
     { id: '1', icon: 'receipt-long', title: 'Order History', subtitle: 'View your past purchases', route: 'OrderHistory' },
+    { id: 'fav', icon: 'favorite', title: 'My Favorites', subtitle: 'Items you quickly reorder', route: 'Favorites' },
+    { id: 'rem', icon: 'alarm', title: 'Daily Reminders', subtitle: 'Manage your medication alerts', route: 'Reminders' },
     { id: '2', icon: 'contact-emergency', title: 'Trusted Contact', subtitle: 'Manage your trusted contacts', route: 'TrustedContact' },
     { id: '3', icon: 'edit', title: 'Edit Profile', subtitle: 'Update your personal details', route: 'EditProfile' },
     { id: '4', icon: 'shield', title: 'Security Settings', subtitle: 'Biometrics & privacy controls', route: 'SecuritySettings' },

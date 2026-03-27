@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const paymentMethods = [
     {
@@ -31,7 +31,10 @@ const paymentMethods = [
 
 export default function CheckoutPaymentScreen() {
     const navigation = useNavigation<any>();
+    const route = useRoute<any>();
     const [selectedMethod, setSelectedMethod] = useState('cod');
+
+    const delivery_address = route.params?.delivery_address || '123 Elderly Care Lane, Section 5, Petaling Jaya, 46000 Selangor';
 
     return (
         <View style={styles.container}>
@@ -138,7 +141,7 @@ export default function CheckoutPaymentScreen() {
             <SafeAreaView edges={['bottom']} style={styles.footer}>
                 <Pressable
                     style={({ pressed }) => [styles.continueButton, pressed && styles.buttonPressed]}
-                    onPress={() => navigation.navigate('CheckoutReview')}
+                    onPress={() => navigation.navigate('CheckoutReview', { delivery_address, payment_method: selectedMethod })}
                 >
                     <Text style={styles.continueButtonText}>Continue to Review</Text>
                     <MaterialIcons name="chevron-right" size={24} color={theme.colors.white} />

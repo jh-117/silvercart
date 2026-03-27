@@ -64,7 +64,8 @@ export default function SearchResultsScreen() {
             brand: 'SilverCare',
             rating: 4.5,
             reviews: Math.floor(Math.random() * 200) + 50,
-            inStock: product.stock_status === 'in_stock'
+            inStock: product.stock_status === 'in_stock',
+            category: product.category,
         });
     };
 

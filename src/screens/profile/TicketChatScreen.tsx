@@ -29,11 +29,35 @@ export default function TicketChatScreen() {
 
     useEffect(() => {
         const load = async () => {
-            if (!ticketId) {
-                navigation.goBack();
-                return;
+            let activeTicketId = ticketId;
+            if (!activeTicketId) {
+                if (!user?.id) {
+                    navigation.goBack();
+                    return;
+                }
+                
+                // See if there's already an open Live Chat
+                const existing = await supportService.getTicketsByUser(user.id);
+                const openLiveChat = existing.find(t => t.subject === 'Live Chat Request' && t.status !== 'resolved' && t.status !== 'closed');
+                
+                if (openLiveChat) {
+                    activeTicketId = openLiveChat.id;
+                } else {
+                    const newTicket = await supportService.createTicket(
+                        user.id,
+                        'Live Chat Request',
+                        'User initiated a live chat.'
+                    );
+                    if (newTicket) {
+                        activeTicketId = newTicket.id;
+                    } else {
+                        navigation.goBack();
+                        return;
+                    }
+                }
             }
-            const data = await supportService.getTicketById(ticketId);
+
+            const data = await supportService.getTicketById(activeTicketId);
             if (data) {
                 setTicket(data);
                 setMessages(data.messages);
@@ -42,7 +66,7 @@ export default function TicketChatScreen() {
             }
         };
         load();
-    }, [ticketId]);
+    }, [ticketId, user?.id]);
 
     // Force scroll to bottom when new messages arrive or keyboard opens
     useEffect(() => {

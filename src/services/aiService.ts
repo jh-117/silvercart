@@ -14,8 +14,9 @@ export interface AIVoiceCommand extends VoiceCommand {
     response?: string;
     product?: string;
     quantity?: number;
+    items?: Array<{ product: string; quantity: number; products?: any[] }>; // Supports multiple items
     category?: string;
-    products?: any[];
+    products?: any[]; // Legacy fallback for single search
 }
 
 /**
@@ -49,22 +50,26 @@ Analyze the user's intent and extract relevant information.
 
 SUPPORTED INTENTS:
 - "search": User wants to find products
-- "add_to_cart": User wants to add a product to cart
+- "add_to_cart": User wants to add product(s) to cart. You MUST extract ALL requested items into an "items" array.
+- "remove_from_cart": User wants to remove product(s) from their cart. You MUST extract ALL requested items into an "items" array.
 - "view_cart": User wants to see their cart
-- "checkout": User wants to complete purchase
-- "navigate": User wants to go to orders, profile, or category (params.category / params.screen)
+- "checkout": User wants to complete purchase, pay, or check out.
+- "navigate": User wants to go to orders, profile, favorites, reminders, or category (params.category / params.screen)
 - "call_contact": User wants to call a contact (e.g. "my son", "doctor", "emergency"). Try to extract the requested name into "contactName".
 - "support": User wants help, support, or live chat
 - "unknown": Cannot determine intent
 
 RESPONSE FORMAT (JSON ONLY, NO MARKDOWN TAGS):
 {
-  "intent": "search",
-  "product": "exact product name",
+  "intent": "add_to_cart",
+  "product": "exact product name", // Use for single 'search'
+  "items": [
+    { "product": "milk", "quantity": 1 },
+    { "product": "panadol", "quantity": 2 }
+  ], // ONLY if intent is add_to_cart
   "contactName": "son", // ONLY if intent is call_contact
-  "quantity": 1,
   "confidence": 0.85,
-  "response": "Friendly confirmation message for the user. E.g: Let me find paracetamol for you."
+  "response": "Friendly confirmation message for the user. E.g: Let me add those to your cart."
 }
 
 IMPORTANT:
@@ -72,6 +77,8 @@ IMPORTANT:
 - If intent is view_cart, checkout, set intent accordingly.
 - If intent is orders, set intent: "navigate", params: { screen: "Orders" }
 - If intent is profile, set intent: "navigate", params: { screen: "Profile" }
+- If intent is favorites, set intent: "navigate", params: { screen: "Favorites" }
+- If intent is reminders or alarms, set intent: "navigate", params: { screen: "Reminders" }
 - If intent is support or help, set intent: "navigate", params: { screen: "Support" }
 - Quantity defaults to 1 if not specified
 - Return ONLY valid JSON. Wait for the user request, do not output anything else.
@@ -93,6 +100,19 @@ IMPORTANT:
             const searchResults = await searchProducts(parsed.product);
             parsed.products = searchResults;
             parsed.params = { query: parsed.product };
+        } else if (parsed.intent === 'add_to_cart' || parsed.intent === 'remove_from_cart') {
+            // Handle multiple items or default fallback
+            if (parsed.items && Array.isArray(parsed.items)) {
+                for (const item of parsed.items) {
+                    const searchResults = await searchProducts(item.product);
+                    item.products = searchResults;
+                }
+            } else if (parsed.product) {
+                // Backward compatibility if AI drops `items` array
+                const searchResults = await searchProducts(parsed.product);
+                parsed.products = searchResults;
+                parsed.items = [{ product: parsed.product, quantity: parsed.quantity || 1, products: searchResults }];
+            }
         } else if (parsed.intent === 'navigate') {
             // Provide safe fallbacks if the AI didn't provide them
             parsed.params = parsed.params || {};
@@ -104,5 +124,54 @@ IMPORTANT:
         console.error('[AI Service] Gemini processing error:', error);
         // Fallback to keyword matching
         return fallbackParseVoiceCommand(transcript);
+    }
+}
+
+/**
+ * Suggest scheduling defaults for Auto-Reorder and Medication Alarm.
+ * Uses Gemini to provide context-aware defaults; falls back to safe values.
+ */
+export async function suggestScheduleDefaults(
+    productName: string,
+    category: string,
+): Promise<{ intervalDays: number; alarmTimes: string[]; reason: string }> {
+    const fallback = {
+        intervalDays: category?.toLowerCase() === 'pharmacy' ? 14 : 30,
+        alarmTimes: category?.toLowerCase() === 'pharmacy' ? ['08:00', '20:00'] : ['09:00'],
+        reason: 'Default suggestion based on category.',
+    };
+
+    if (!genAI) return fallback;
+
+    try {
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const prompt = `
+You are a helpful health and shopping assistant for elderly users in Malaysia.
+
+Product: "${productName}"
+Category: "${category}"
+
+Based on the product name and category, suggest:
+1. How often should this be reordered? (intervalDays: number between 7 and 90)
+2. If it's a medication, what are the ideal reminder times? (alarmTimes: array of "HH:MM" strings, max 3)
+3. A brief reason for your suggestion (reason: short string, max 15 words)
+
+IMPORTANT: Return ONLY pure JSON (no markdown, no extra text):
+{
+  "intervalDays": 30,
+  "alarmTimes": ["08:00", "20:00"],
+  "reason": "Taken twice daily; typically a 30-day supply."
+}`;
+
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const parsed = JSON.parse(text);
+        return {
+            intervalDays: parsed.intervalDays ?? fallback.intervalDays,
+            alarmTimes: parsed.alarmTimes ?? fallback.alarmTimes,
+            reason: parsed.reason ?? fallback.reason,
+        };
+    } catch {
+        return fallback;
     }
 }
