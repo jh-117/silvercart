@@ -9,10 +9,12 @@ import { processVoiceCommand } from '../../services/aiService';
 import { useToast } from '../../hooks/useToast';
 import { supabase } from '../../services/supabase';
 import * as Speech from 'expo-speech';
+import { useCart } from '../../contexts/CartContext';
 
 export default function VoiceSearchScreen() {
     const navigation = useNavigation<any>();
     const toast = useToast();
+    const cart = useCart();
     const {
         isListening,
         transcript,
@@ -167,11 +169,20 @@ export default function VoiceSearchScreen() {
                                 for (const item of command.items) {
                                     if (item.products && item.products.length > 0) {
                                         const product = item.products[0];
-                                        await supabase.from('cart_items').upsert({
-                                            user_id: userData.user.id,
-                                            product_id: product.id,
-                                            quantity: item.quantity || 1
-                                        }, { onConflict: 'user_id,product_id' });
+                                        const qty = item.quantity || 1;
+
+                                        // Update local cart state (this is what CartScreen renders)
+                                        await cart.addItem(product.id, qty);
+
+                                        // Persist to backend cart as well (for cross-device / future sync)
+                                        await supabase.from('cart_items').upsert(
+                                            {
+                                                user_id: userData.user.id,
+                                                product_id: product.id,
+                                                quantity: qty,
+                                            },
+                                            { onConflict: 'user_id,product_id' }
+                                        );
                                         addedCount++;
                                     } else {
                                         notFoundNames.push(item.product);
@@ -215,6 +226,9 @@ export default function VoiceSearchScreen() {
                                 for (const item of command.items) {
                                     if (item.products && item.products.length > 0) {
                                         const product = item.products[0];
+                                        // Update local cart state (this is what CartScreen renders)
+                                        await cart.removeItem(product.id);
+
                                         await supabase.from('cart_items').delete()
                                             .eq('user_id', userData.user.id)
                                             .eq('product_id', product.id);

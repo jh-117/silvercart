@@ -45,7 +45,9 @@ export default function GlobalVoiceButton() {
         currentRouteName.startsWith('Home') || 
         currentRouteName.startsWith('Onboarding') || 
         currentRouteName.startsWith('Tutorial') || 
-        currentRouteName.startsWith('VoiceSearch');
+        currentRouteName.startsWith('VoiceSearch') ||
+        currentRouteName.startsWith('Cart') ||
+        currentRouteName.startsWith('Checkout');
 
     if (!session || isAdmin || !hasCompletedSetup || isKeyboardVisible || isHiddenRoute) {
         return null;
