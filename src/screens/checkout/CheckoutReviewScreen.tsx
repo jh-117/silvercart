@@ -40,11 +40,11 @@ export default function CheckoutReviewScreen() {
     const handlePlaceOrder = async () => {
         if (!isConfirmed || placing) return;
         if (!user) {
-            Alert.alert('Error', 'You must be logged in to place an order.');
+            Alert.alert('Oops!', 'You must be logged in to place an order.');
             return;
         }
         if (items.length === 0) {
-            Alert.alert('Empty Cart', 'Your cart is empty. Please add items before placing an order.');
+            Alert.alert('Your Cart is Empty', 'Let\'s add some items before we check out!');
             return;
         }
 
@@ -107,10 +107,10 @@ export default function CheckoutReviewScreen() {
 
                 navigation.navigate('OrderSuccess', { orderId: result.orderId });
             } else {
-                Alert.alert('Order Failed', result.error ?? 'Failed to place order. Please try again.');
+                Alert.alert('Oops!', result.error ?? 'We couldn\'t place your order. Please try again.');
             }
         } catch (e: any) {
-            Alert.alert('Error', e?.message ?? 'Something went wrong.');
+            Alert.alert('Oops!', e?.message ?? 'Something went wrong. Please try again.');
         } finally {
             setPlacing(false);
         }

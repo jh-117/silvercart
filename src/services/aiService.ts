@@ -73,7 +73,7 @@ RESPONSE FORMAT (JSON ONLY, NO MARKDOWN TAGS):
 }
 
 IMPORTANT:
-- Match product names flexibly (e.g., "panadol" matches "Paracetamol 500mg")
+- Extract the product name as the user said it (e.g., "panado", "panadol", "milo"). Do NOT substitute or map product names to other products — pass the name through exactly so the search engine can find the closest match.
 - If intent is view_cart, checkout, set intent accordingly.
 - If intent is orders, set intent: "navigate", params: { screen: "Orders" }
 - If intent is profile, set intent: "navigate", params: { screen: "Profile" }

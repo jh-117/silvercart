@@ -52,12 +52,12 @@ export default function AddTrustedContactScreen() {
 
     const handleSave = async () => {
         if (!fullName || !phoneNumber || !relationship) {
-            Alert.alert('Missing Info', 'Please fill in all required fields.');
+            Alert.alert('Missing Info', 'Looks like you missed a spot. Please fill in all the details.');
             return;
         }
         const normalizedPhone = normalizeMalaysiaPhone(phoneNumber);
         if (!normalizedPhone) {
-            Alert.alert('Invalid Phone', 'Please enter a valid phone number.');
+            Alert.alert('Check Phone Number', 'Make sure the phone number is typed correctly.');
             return;
         }
         if (!user) return;
@@ -72,7 +72,7 @@ export default function AddTrustedContactScreen() {
 
             if (countError) throw countError;
             if (count && count >= 2) {
-                Alert.alert('Limit Reached', 'You can only have a maximum of 2 trusted contacts.');
+                Alert.alert('Maximum Contacts', 'You already have 2 trusted contacts saved.');
                 return;
             }
 
@@ -99,7 +99,7 @@ export default function AddTrustedContactScreen() {
                 navigation.goBack();
             }
         } catch (err: any) {
-            Alert.alert('Error', err.message || 'Failed to save contact.');
+            Alert.alert('Oops!', err.message || 'We couldn\'t save this contact. Please try again.');
         } finally {
             setSaving(false);
         }

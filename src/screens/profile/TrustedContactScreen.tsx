@@ -65,7 +65,7 @@ export default function TrustedContactScreen() {
     const handleTestNotification = async (contactName: string) => {
         const { status } = await Notifications.requestPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'Please enable notifications in your phone settings to test this feature.');
+            Alert.alert('Turn On Notifications', 'Please go to your phone settings to allow SilverCart to send you updates.');
             return;
         }
 

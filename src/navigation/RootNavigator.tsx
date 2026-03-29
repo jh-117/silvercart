@@ -54,6 +54,7 @@ import ErrorScreen from '../screens/special/ErrorScreen';
 import VoiceSearchScreen from '../screens/voice/VoiceSearchScreen';
 import VoiceCommandsHelpScreen from '../screens/voice/VoiceCommandsHelpScreen';
 import CategoryScreen from '../screens/products/CategoryScreen';
+import OnboardingSafetyScreen from '../screens/special/OnboardingSafetyScreen';
 
 import GlobalVoiceButton from '../components/ui/GlobalVoiceButton';
 
@@ -71,6 +72,7 @@ export default function RootNavigator() {
     const { session, loading, isAdmin, hasCompletedSetup } = useAuth();
 
     const [hasOnboarded, setHasOnboarded] = React.useState<boolean | null>(null);
+    const [hasSeenSafetyScreen, setHasSeenSafetyScreen] = React.useState<boolean | null>(null);
     const [isBiometricLocked, setIsBiometricLocked] = React.useState<boolean>(false);
     const [checkingApp, setCheckingApp] = React.useState<boolean>(true);
 
@@ -79,6 +81,9 @@ export default function RootNavigator() {
             try {
                 const onboardValue = await SecureStore.getItemAsync('hasOnboarded');
                 setHasOnboarded(onboardValue === 'true');
+
+                const safetyValue = await SecureStore.getItemAsync('hasSeenSafetyScreen');
+                setHasSeenSafetyScreen(safetyValue === 'true');
 
                 const bioValue = await SecureStore.getItemAsync('biometrics_enabled');
                 if (bioValue === 'true') {
@@ -94,7 +99,7 @@ export default function RootNavigator() {
         initializeApp();
     }, []);
 
-    if (loading || hasOnboarded === null || checkingApp) {
+    if (loading || hasOnboarded === null || hasSeenSafetyScreen === null || checkingApp) {
         return <LoadingScreen />;
     }
 
@@ -120,7 +125,11 @@ export default function RootNavigator() {
                                 <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
                             ) : null}
 
-                            {hasOnboarded && !hasCompletedSetup ? (
+                            {!hasSeenSafetyScreen ? (
+                                <Stack.Screen name="OnboardingSafety" component={OnboardingSafetyScreen} />
+                            ) : null}
+
+                            {hasOnboarded && hasSeenSafetyScreen && !hasCompletedSetup ? (
                                 <Stack.Screen name="Setup" component={SetupNavigator} />
                             ) : null}
 

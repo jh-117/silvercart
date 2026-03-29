@@ -110,19 +110,19 @@ export default function ProductDetailsScreen() {
             <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
+                    <Pressable onPress={() => navigation.goBack()} style={styles.iconButton} hitSlop={12}>
                         <MaterialIcons name="arrow-back" size={24} color={theme.colors.primary} />
                     </Pressable>
                     <Text style={styles.headerTitle}>Product Details</Text>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                        <Pressable onPress={handleFavorite} style={styles.iconButton}>
+                        <Pressable onPress={handleFavorite} style={styles.iconButton} hitSlop={12}>
                             <MaterialIcons 
                                 name={isFav ? "favorite" : "favorite-border"} 
                                 size={24} 
                                 color={isFav ? "#e53e3e" : theme.colors.primary} 
                             />
                         </Pressable>
-                        <Pressable onPress={() => navigation.navigate('Cart')} style={styles.iconButton}>
+                        <Pressable onPress={() => navigation.navigate('Cart')} style={styles.iconButton} hitSlop={12}>
                             <MaterialIcons name="shopping-cart" size={24} color={theme.colors.primary} />
                         </Pressable>
                     </View>

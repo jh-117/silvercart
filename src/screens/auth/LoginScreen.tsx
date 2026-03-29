@@ -62,15 +62,15 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     // ── Email login ──────────────────────────────────────────────
     const handleEmailLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert('Missing Info', 'Looks like you missed a spot. Please fill in all the details.');
             return;
         }
         setLoading(true);
         try {
             const { error } = await authService.signInWithEmail(email, password);
-            if (error) Alert.alert('Login Failed', error.message);
+            if (error) Alert.alert('Oops!', 'We couldn\'t sign you in. Please check your details and try again.');
         } catch {
-            Alert.alert('Error', 'An unexpected error occurred');
+            Alert.alert('Oops!', 'An unexpected issue occurred. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -81,7 +81,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         setPhoneError('');
         const digits = phone.replace(/\s/g, '');
         if (digits.length < 9 || digits.length > 11) {
-            setPhoneError('Please enter a valid Malaysian phone number (9–11 digits).');
+            setPhoneError('Make sure your number is typed correctly.');
             return;
         }
 
@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             setCooldown(COOLDOWN_SECONDS);
             setOtp('');
         } catch {
-            setPhoneError('Failed to send OTP. Please try again.');
+            setPhoneError('We couldn\'t send the code. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -119,7 +119,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             setCooldown(COOLDOWN_SECONDS);
             Alert.alert('Code Sent ✓', `A new code has been sent to +60${digits.startsWith('0') ? digits.slice(1) : digits}`);
         } catch {
-            setPhoneError('Failed to resend OTP. Please try again.');
+            setPhoneError('We couldn\'t resend the code. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -143,7 +143,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             }
             // On success, AuthContext onAuthStateChange will auto-navigate
         } catch {
-            setOtpError('Verification failed. Please try again.');
+            setOtpError('That code didn\'t work. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -18,12 +18,12 @@ export default function OnboardingBiometricScreen() {
             const enrolled = await LocalAuthentication.isEnrolledAsync();
 
             if (!compatible) {
-                Alert.alert('Not Supported', 'Your device does not support biometric authentication.');
+                Alert.alert('Face/Fingerprint ID Unavailable', 'Your phone doesn\'t seem to support this feature yet.');
                 navigation.navigate('OnboardingTutorial');
                 return;
             }
             if (!enrolled) {
-                Alert.alert('No Biometrics Set Up', 'Please set up Face ID or fingerprint in your device settings first.');
+                Alert.alert('Almost There!', 'You need to turn on Face ID or Fingerprint in your phone\'s main settings first.');
                 navigation.navigate('OnboardingTutorial');
                 return;
             }

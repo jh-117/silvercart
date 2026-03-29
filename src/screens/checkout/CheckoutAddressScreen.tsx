@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 
-const HTML_CONTENT = `
+const HTML_CONTENT = (apiKey: string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,7 +112,7 @@ const HTML_CONTENT = `
 </main>
 
 <script>
-    const API_KEY = '97a2d65956004eed91725e0bcef86025';
+    const API_KEY = '\${apiKey}';
     // Init map centered on KL
     const map = L.map('map', { zoomControl: false }).setView([3.1390, 101.6869], 16);
 
@@ -284,6 +284,7 @@ const HTML_CONTENT = `
 export default function CheckoutAddressScreen() {
     const navigation = useNavigation<any>();
     const webViewRef = useRef<WebView>(null);
+    const API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_KEY || '';
 
     useEffect(() => {
         // Pre-request location permissions so WebView logic works securely.
@@ -328,7 +329,7 @@ export default function CheckoutAddressScreen() {
             <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#ffffff' }}>
                 <WebView
                     ref={webViewRef}
-                    source={{ html: HTML_CONTENT }}
+                    source={{ html: HTML_CONTENT(API_KEY) }}
                     style={styles.webview}
                     onMessage={onMessage}
                     geolocationEnabled={true}

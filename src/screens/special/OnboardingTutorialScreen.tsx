@@ -49,19 +49,15 @@ export default function OnboardingTutorialScreen({ navigation }: OnboardingTutor
         if (activeIndex < slides.length - 1) {
             scrollRef.current?.scrollTo({ x: width * (activeIndex + 1), animated: true });
         } else {
-            // Save state and Navigate to Main
+            // Save state and Navigate to Safety Screen
             await SecureStore.setItemAsync('hasOnboarded', 'true');
-            // We can't easily force a re-render of RootNavigator from here without a context/reload
-            // But usually, navigating to Main works because it's in the stack. 
-            // However, with the conditional rendering in RootNavigator, we might need to reload or use a context.
-            // For now, let's just navigate. If RootNavigator re-evaluates, it will hide Onboarding.
-            navigation.getParent()?.navigate('Main' as any);
+            navigation.getParent()?.navigate('OnboardingSafety' as any);
         }
     };
 
     const handleSkip = async () => {
         await SecureStore.setItemAsync('hasOnboarded', 'true');
-        navigation.getParent()?.navigate('Main' as any);
+        navigation.getParent()?.navigate('OnboardingSafety' as any);
     };
 
     return (

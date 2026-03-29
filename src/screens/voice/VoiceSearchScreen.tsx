@@ -89,12 +89,12 @@ export default function VoiceSearchScreen() {
             if (command.confidence && command.confidence > 0.4 || command.intent !== 'unknown') {
                 setTimeout(() => handleVoiceCommand(command), 1000); // 1 sec delay to read the response
             } else {
-                toast.showWarning('Sorry, I didn\'t understand that. Please try again.');
+                toast.showWarning('Sorry, my ears missed that! Could you say it once more?');
                 setStatusText('Tap the microphone to try again');
             }
         } catch (err) {
             console.error('AI Processing error:', err);
-            toast.showError('Trouble understanding. Please try again.');
+            toast.showError('Hmm, the connection dropped or is weak. Let\'s try again.');
             setStatusText('Tap the microphone to try again');
         } finally {
             setIsProcessing(false);
@@ -211,8 +211,8 @@ export default function VoiceSearchScreen() {
                             }
                         } catch (err) {
                             console.error('Cart add error', err);
-                            toast.showError('Failed to add to cart');
-                            speakAndSetStatus('Sorry, I failed to add that to your cart.');
+                            toast.showError('Oops! We couldn\'t add that right now.');
+                            speakAndSetStatus('Sorry, I had trouble adding that to your cart just now.');
                         }
                     }
                     break;
@@ -310,8 +310,8 @@ export default function VoiceSearchScreen() {
             }
         } catch (err) {
             console.error('Navigation error:', err);
-            toast.showError('Failed to navigate. Please try again.');
-            speakAndSetStatus('Failed to navigate. Please try again.');
+            toast.showError('Oops! My screen got stuck. Please try again.');
+            speakAndSetStatus('I got a little stuck trying to do that. Let\'s try again.');
         }
     };
 

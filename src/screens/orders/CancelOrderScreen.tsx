@@ -59,11 +59,11 @@ export default function CancelOrderScreen() {
     const handleCancel = () => {
         if (!order) return;
         if (windowExpired) {
-            Alert.alert('Window Expired', 'The 5-minute cancellation window has passed. Please contact support for assistance.');
+            Alert.alert('Window Expired', 'The cancellation window has passed. Please contact support for assistance.');
             return;
         }
         if (!selectedReason) {
-            Alert.alert('Select Reason', 'Please select a reason for cancellation.');
+            Alert.alert('Just One More Thing', 'Please tell us why you are cancelling before we proceed.');
             return;
         }
         Alert.alert(
@@ -91,7 +91,7 @@ export default function CancelOrderScreen() {
                                 { text: 'OK', onPress: () => { navigation.popToTop(); } }
                             ]);
                         } else {
-                            Alert.alert('Error', result.error ?? 'Failed to cancel order. Please try again.');
+                            Alert.alert('Oops!', result.error ?? 'We couldn\'t process the cancellation. Please try again.');
                         }
                     }
                 }

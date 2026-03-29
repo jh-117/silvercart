@@ -6,9 +6,36 @@ import { theme } from '../../theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/useAuth';
 
+const SAFETY_TIPS = [
+    "SilverCart will NEVER ask you for your 6-digit OTP code.",
+    "Only pay cash to our verified delivery partners wearing ID badges.",
+    "Beware of fake WhatsApp messages. We only contact you via official channels.",
+    "Check your prescription expiry dates regularly.",
+    "Never send money to personal bank accounts."
+];
+
 export default function HomeScreen() {
     const navigation = useNavigation<any>();
     const { profile } = useAuth();
+
+    const [currentTip, setCurrentTip] = React.useState(SAFETY_TIPS[0]);
+
+    React.useEffect(() => {
+        // Pick a random tip on mount
+        const randomTip = SAFETY_TIPS[Math.floor(Math.random() * SAFETY_TIPS.length)];
+        setCurrentTip(randomTip);
+
+        // Rotate tip every 10 seconds
+        const interval = setInterval(() => {
+            setCurrentTip((prev) => {
+                const currentIndex = SAFETY_TIPS.indexOf(prev);
+                const nextIndex = (currentIndex + 1) % SAFETY_TIPS.length;
+                return SAFETY_TIPS[nextIndex];
+            });
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSpeakPress = () => {
         navigation.navigate('VoiceSearch');
@@ -32,7 +59,7 @@ export default function HomeScreen() {
                     </View>
                     <Text style={styles.brandText}>SilverCart</Text>
                 </View>
-                <Pressable style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
+                <Pressable style={styles.profileButton} onPress={() => navigation.navigate('Profile')} hitSlop={12}>
                     {profile?.avatar_url ? (
                         <Image source={{ uri: profile.avatar_url }} style={styles.headerAvatar} />
                     ) : (
@@ -108,7 +135,7 @@ export default function HomeScreen() {
                         <MaterialIcons name="info" size={28} color="#1976D2" />
                         <View style={styles.safetyTextContainer}>
                             <Text style={styles.safetyTitle}>Safety Tip</Text>
-                            <Text style={styles.safetyDescription}>Remember to check your prescription expiry dates regularly.</Text>
+                            <Text style={styles.safetyDescription}>{currentTip}</Text>
                         </View>
                     </View>
                 </View>
@@ -324,7 +351,7 @@ const styles = StyleSheet.create({
         fontFamily: theme.typography.fontFamily.bold,
     },
     safetyDescription: {
-        fontSize: 16,
+        fontSize: 18,
         color: '#1565C0', // Blue-800
         lineHeight: 24,
         fontFamily: theme.typography.fontFamily.medium,

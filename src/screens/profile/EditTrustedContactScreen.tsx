@@ -47,7 +47,7 @@ export default function EditTrustedContactScreen() {
     useEffect(() => {
         const fetchContact = async () => {
             if (!contactId || !user) {
-                Alert.alert('Error', 'Contact not found.');
+                Alert.alert('Oops!', 'We couldn\'t find that contact.');
                 navigation.goBack();
                 return;
             }
@@ -70,7 +70,7 @@ export default function EditTrustedContactScreen() {
                 }
             } catch (err: any) {
                 console.error(err);
-                Alert.alert('Error', 'Failed to load contact details.');
+                Alert.alert('Oops!', 'We couldn\'t load the contact details.');
                 navigation.goBack();
             } finally {
                 setLoading(false);
@@ -82,12 +82,12 @@ export default function EditTrustedContactScreen() {
 
     const handleSave = async () => {
         if (!fullName || !phoneNumber || !relationship) {
-            Alert.alert('Missing Info', 'Please fill in all required fields.');
+            Alert.alert('Missing Info', 'Looks like you missed a spot. Please fill in all the details.');
             return;
         }
         const normalizedPhone = normalizeMalaysiaPhone(phoneNumber);
         if (!normalizedPhone) {
-            Alert.alert('Invalid Phone', 'Please enter a valid phone number.');
+            Alert.alert('Check Phone Number', 'Make sure the phone number is typed correctly.');
             return;
         }
         if (!user || !contactId) return;
@@ -112,7 +112,7 @@ export default function EditTrustedContactScreen() {
             Alert.alert('Saved', 'Trusted contact updated successfully.');
             navigation.goBack();
         } catch (err: any) {
-            Alert.alert('Error', err.message || 'Failed to update contact.');
+            Alert.alert('Oops!', err.message || 'We couldn\'t update this contact. Please try again.');
         } finally {
             setSaving(false);
         }
