@@ -152,7 +152,7 @@ export default function AdminInventoryScreen() {
                     <Text style={styles.statValuePrimary}>RM {totalValue.toFixed(2)}</Text>
                 </View>
                 <View style={styles.statCard}>
-                    <Text style={styles.statLabel}>LOW STOCK</Text>
+                    <Text style={styles.statLabel}>OUT OF STOCK</Text>
                     <Text style={styles.statValueAlert}>{lowStockCount} Items</Text>
                 </View>
             </View>

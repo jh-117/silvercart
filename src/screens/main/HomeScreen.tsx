@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -59,7 +60,14 @@ export default function HomeScreen() {
                     </View>
                     <Text style={styles.brandText}>SilverCart</Text>
                 </View>
-                <Pressable style={styles.profileButton} onPress={() => navigation.navigate('Profile')} hitSlop={12}>
+                <Pressable
+                    style={styles.profileButton}
+                    onPress={() => navigation.navigate('Profile')}
+                    hitSlop={12}
+                    accessibilityRole="button"
+                    accessibilityLabel="User profile"
+                    accessibilityHint="Navigates to your profile and settings"
+                >
                     {profile?.avatar_url ? (
                         <Image source={{ uri: profile.avatar_url }} style={styles.headerAvatar} />
                     ) : (
@@ -90,6 +98,9 @@ export default function HomeScreen() {
                             pressed && styles.voiceButtonPressed
                         ]}
                         onPress={handleSpeakPress}
+                        accessibilityRole="button"
+                        accessibilityLabel="Voice Search"
+                        accessibilityHint="Double tap to start speaking your request"
                     >
                         <View style={styles.micCircle}>
                             <MaterialIcons name="mic" size={64} color={theme.colors.white} />
@@ -103,7 +114,13 @@ export default function HomeScreen() {
                 {/* Action Cards Grid */}
                 <View style={styles.gridContainer}>
                     {/* Pharmacy Card */}
-                    <Pressable style={styles.card} onPress={handlePharmacyPress}>
+                    <Pressable
+                        style={styles.card}
+                        onPress={handlePharmacyPress}
+                        accessibilityRole="button"
+                        accessibilityLabel="Pharmacy Category"
+                        accessibilityHint="Browse all pharmacy products"
+                    >
                         <Image
                             source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwIUY2hmB14fVfLSZERBY_WR7OI4bqTpNPl_M2V2uFXmg5h2jODomFk2nFyXqSxT9WKeKsEkxvvX1QyuNSrb82rK6zlrmIdEHy5AAWUgfhm7vuPhyBl0kpgDXjCCKYVx0aYmzag-cuLOwgmrzaPsz2x5VqQAFjCE9s_5s8-OD7zE_TqYGwDWklljH1q56ZZ31KuLB7Hk6CnIvsfrjr-2-mWvA9_RL9yloTh65yyedzjGjwsJEV_w3yqsFUWI5Bewinz_rgaeJiN-4' }}
                             style={styles.cardImage}
@@ -116,7 +133,13 @@ export default function HomeScreen() {
                     </Pressable>
 
                     {/* Groceries Card */}
-                    <Pressable style={styles.card} onPress={handleGroceriesPress}>
+                    <Pressable
+                        style={styles.card}
+                        onPress={handleGroceriesPress}
+                        accessibilityRole="button"
+                        accessibilityLabel="Groceries Category"
+                        accessibilityHint="Browse all grocery products"
+                    >
                         <Image
                             source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB9i_vez22eG7YDqokNi6Jun8w47DSqoYl9OMLFMWm5GxAgmw92_dSDNj6zaora_x2aIExWU98D266PbU1JXHwClsI5mvi3i1CYJjildHeqp6zIJ5QsGds1RXt1zWynoACxqIlgRB_7H68Eg45nYOzhnsq6ms8RGdu6uWZa4J0uQ41C7Dq_9czsbujuJ7MkC_AhRU8SDZv2AigI79txhuloQt5XCgl-QuoIQ8dcLCAGJrZD0YZuP7m9-NnA6M0ly8AC6UY9LeqU508' }}
                             style={styles.cardImage}

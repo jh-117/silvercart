@@ -47,8 +47,8 @@ export default function AdminOrdersScreen() {
                     <Text style={styles.cardId}>#{item.id.slice(0, 8).toUpperCase()}</Text>
                     <Text style={styles.cardCustomer}>{item.customer_name ?? 'Customer'}</Text>
                 </View>
-                <View style={[styles.badge, { backgroundColor: `${STATUS_COLOR[item.status]}20` }]}>
-                    <Text style={[styles.badgeText, { color: STATUS_COLOR[item.status] }]}>
+                <View style={[styles.badge, { backgroundColor: STATUS_COLOR[item.status] }]}>
+                    <Text style={styles.badgeText}>
                         {item.status.toUpperCase()}
                     </Text>
                 </View>
@@ -80,12 +80,7 @@ export default function AdminOrdersScreen() {
             </SafeAreaView>
 
             {/* Filter chips */}
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.filterRow}
-                contentContainerStyle={styles.filterContent}
-            >
+            <View style={styles.filterContainer}>
                 {FILTERS.map(f => (
                     <Pressable
                         key={f}
@@ -97,7 +92,7 @@ export default function AdminOrdersScreen() {
                         </Text>
                     </Pressable>
                 ))}
-            </ScrollView>
+            </View>
 
             {loading ? (
                 <View style={styles.center}>
@@ -144,23 +139,30 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontFamily: theme.typography.fontFamily.bold,
     },
-    filterRow: {
+    filterContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
-        maxHeight: 56,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 4,
     },
-    filterContent: { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
     chip: {
         paddingHorizontal: 14,
         paddingVertical: 7,
         borderRadius: 20,
-        backgroundColor: '#F1F5F9',
+        backgroundColor: '#FFFFFF',
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        borderColor: '#CBD5E1',
+        marginRight: 8,
+        marginBottom: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    chipActive: { backgroundColor: '#1E293B', borderColor: '#1E293B' },
-    chipText: { fontSize: 13, fontWeight: '600', color: '#64748B', fontFamily: theme.typography.fontFamily.semibold },
+    chipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+    chipText: { fontSize: 13, fontWeight: '600', color: '#475569', fontFamily: theme.typography.fontFamily.semibold },
     chipTextActive: { color: '#FFFFFF' },
     listContent: { padding: 16, gap: 12, paddingBottom: 48 },
     card: {
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     cardId: { fontSize: 15, fontWeight: '700', color: '#1E293B', fontFamily: theme.typography.fontFamily.bold },
     cardCustomer: { fontSize: 13, color: '#64748B', fontFamily: theme.typography.fontFamily.regular },
     badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-    badgeText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, fontFamily: theme.typography.fontFamily.bold },
+    badgeText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, fontFamily: theme.typography.fontFamily.bold, color: '#FFFFFF' },
     cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     cardInfo: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     cardDate: { fontSize: 13, color: '#94A3B8', fontFamily: theme.typography.fontFamily.regular },

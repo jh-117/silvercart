@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -110,19 +111,37 @@ export default function ProductDetailsScreen() {
             <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Pressable onPress={() => navigation.goBack()} style={styles.iconButton} hitSlop={12}>
+                    <Pressable
+                        onPress={() => navigation.goBack()}
+                        style={styles.iconButton}
+                        hitSlop={12}
+                        accessibilityRole="button"
+                        accessibilityLabel="Go back"
+                    >
                         <MaterialIcons name="arrow-back" size={24} color={theme.colors.primary} />
                     </Pressable>
                     <Text style={styles.headerTitle}>Product Details</Text>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                        <Pressable onPress={handleFavorite} style={styles.iconButton} hitSlop={12}>
+                        <Pressable
+                            onPress={handleFavorite}
+                            style={styles.iconButton}
+                            hitSlop={12}
+                            accessibilityRole="button"
+                            accessibilityLabel={isFav ? "Remove from favorites" : "Add to favorites"}
+                        >
                             <MaterialIcons 
                                 name={isFav ? "favorite" : "favorite-border"} 
                                 size={24} 
                                 color={isFav ? "#e53e3e" : theme.colors.primary} 
                             />
                         </Pressable>
-                        <Pressable onPress={() => navigation.navigate('Cart')} style={styles.iconButton} hitSlop={12}>
+                        <Pressable
+                            onPress={() => navigation.navigate('Cart')}
+                            style={styles.iconButton}
+                            hitSlop={12}
+                            accessibilityRole="button"
+                            accessibilityLabel="View Cart"
+                        >
                             <MaterialIcons name="shopping-cart" size={24} color={theme.colors.primary} />
                         </Pressable>
                     </View>
@@ -254,11 +273,22 @@ export default function ProductDetailsScreen() {
                         {/* Quantity Selector */}
                         <Text style={styles.sectionTitle}>Select Quantity</Text>
                         <View style={styles.quantityContainer}>
-                            <Pressable style={styles.quantityBtnOutline} onPress={handleDecrement}>
+                            <Pressable 
+                                style={styles.quantityBtnOutline} 
+                                onPress={handleDecrement}
+                                accessibilityRole="button"
+                                accessibilityLabel="Decrease quantity"
+                                accessibilityHint={`Current quantity is ${quantity}`}
+                            >
                                 <MaterialIcons name="remove" size={32} color={theme.colors.primary} />
                             </Pressable>
-                            <Text style={styles.quantityText}>{quantity}</Text>
-                            <Pressable style={styles.quantityBtnFilled} onPress={handleIncrement}>
+                            <Text style={styles.quantityText} accessibilityLabel={`Quantity ${quantity}`}>{quantity}</Text>
+                            <Pressable 
+                                style={styles.quantityBtnFilled} 
+                                onPress={handleIncrement}
+                                accessibilityRole="button"
+                                accessibilityLabel="Increase quantity"
+                            >
                                 <MaterialIcons name="add" size={32} color={theme.colors.white} />
                             </Pressable>
                         </View>
@@ -285,6 +315,8 @@ export default function ProductDetailsScreen() {
                     style={[styles.addToCartButton, !inStock && styles.addToCartDisabled]}
                     onPress={handleAddToCart}
                     disabled={!inStock}
+                    accessibilityRole="button"
+                    accessibilityLabel={inStock ? "Add to Cart" : "Out of Stock"}
                 >
                     <MaterialIcons name="shopping-bag" size={28} color={theme.colors.white} />
                     <Text style={styles.addToCartText}>{inStock ? 'Add to Cart' : 'Out of Stock'}</Text>

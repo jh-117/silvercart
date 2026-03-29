@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Switch, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Switch, Image, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -23,8 +23,11 @@ export default function AdminProductEditorScreen() {
         search_keywords: productToEdit?.search_keywords?.join(', ') || '',
     });
 
-    const [showOnStorefront, setShowOnStorefront] = useState(true);
-    const [elderlyFriendly, setElderlyFriendly] = useState(true);
+    const [showOnStorefront, setShowOnStorefront] = useState(productToEdit?.show_on_storefront ?? true);
+    const [elderlyFriendly, setElderlyFriendly] = useState(productToEdit?.elderly_friendly ?? true);
+
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [showStockDropdown, setShowStockDropdown] = useState(false);
 
     const handleSave = async () => {
         if (!formData.name || !formData.price || !formData.category) {
@@ -47,7 +50,9 @@ export default function AdminProductEditorScreen() {
                 description: formData.description,
                 image_url: formData.image_url,
                 stock_status: formData.stock_status,
-                search_keywords: formData.search_keywords.split(',').map(s => s.trim()).filter(Boolean),
+                search_keywords: formData.search_keywords.split(',').map((s: string) => s.trim()).filter(Boolean),
+                show_on_storefront: showOnStorefront,
+                elderly_friendly: elderlyFriendly,
             };
 
             if (isEditing) {
@@ -134,17 +139,14 @@ export default function AdminProductEditorScreen() {
 
                         <View style={styles.formGroup}>
                             <Text style={styles.label}>Category</Text>
-                            <View style={styles.selectWrapper}>
-                                <TextInput
-                                    style={styles.input}
-                                    value={formData.category}
-                                    onChangeText={(val) => setFormData({ ...formData, category: val.toLowerCase() })}
-                                    placeholder="pharmacy / grocery"
-                                    placeholderTextColor="#9CA3AF"
-                                    autoCapitalize="none"
-                                />
-                                <MaterialIcons name="unfold-more" size={20} color="#9CA3AF" style={styles.selectIcon} />
-                            </View>
+                            <Pressable style={styles.selectWrapper} onPress={() => setShowCategoryDropdown(true)}>
+                                <View style={styles.input}>
+                                    <Text style={{ fontSize: 16, color: formData.category ? '#121717' : '#9CA3AF', textTransform: 'capitalize' }}>
+                                        {formData.category || 'Select category...'}
+                                    </Text>
+                                </View>
+                                <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" style={styles.selectIcon} />
+                            </Pressable>
                         </View>
 
                         <View style={styles.formGroup}>
@@ -219,17 +221,14 @@ export default function AdminProductEditorScreen() {
                             </View>
                             <View style={[styles.formGroup, { flex: 1, paddingLeft: 12 }]}>
                                 <Text style={styles.label}>Stock Status</Text>
-                                <View style={styles.selectWrapper}>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={formData.stock_status}
-                                        onChangeText={(val) => setFormData({ ...formData, stock_status: val.toLowerCase() as 'in_stock' | 'out_of_stock' })}
-                                        placeholder="in_stock"
-                                        autoCapitalize="none"
-                                        placeholderTextColor="#9CA3AF"
-                                    />
-                                    <MaterialIcons name="unfold-more" size={20} color="#9CA3AF" style={styles.selectIcon} />
-                                </View>
+                                <Pressable style={styles.selectWrapper} onPress={() => setShowStockDropdown(true)}>
+                                    <View style={styles.input}>
+                                        <Text style={{ fontSize: 16, color: formData.stock_status ? '#121717' : '#9CA3AF', textTransform: 'capitalize' }}>
+                                            {formData.stock_status.replace('_', ' ') || 'Select status...'}
+                                        </Text>
+                                    </View>
+                                    <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" style={styles.selectIcon} />
+                                </Pressable>
                             </View>
                         </View>
 
@@ -307,6 +306,40 @@ export default function AdminProductEditorScreen() {
                     )}
                 </Pressable>
             </View>
+            {/* Modals for Dropdowns */}
+            <Modal visible={showCategoryDropdown} transparent animationType="fade">
+                <Pressable style={styles.modalOverlay} onPress={() => setShowCategoryDropdown(false)}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.cardHeaderTitle}>Select Category</Text>
+                        <View style={{ height: 16 }} />
+                        {['pharmacy', 'grocery'].map(cat => (
+                            <Pressable key={cat} style={styles.modalOption} onPress={() => { setFormData({ ...formData, category: cat }); setShowCategoryDropdown(false); }}>
+                                <Text style={[styles.modalOptionText, formData.category === cat && styles.modalOptionTextActive]}>
+                                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                </Text>
+                                {formData.category === cat && <MaterialIcons name="check" size={20} color={theme.colors.primary} />}
+                            </Pressable>
+                        ))}
+                    </View>
+                </Pressable>
+            </Modal>
+
+            <Modal visible={showStockDropdown} transparent animationType="fade">
+                <Pressable style={styles.modalOverlay} onPress={() => setShowStockDropdown(false)}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.cardHeaderTitle}>Select Stock Status</Text>
+                        <View style={{ height: 16 }} />
+                        {['in_stock', 'out_of_stock'].map(status => (
+                            <Pressable key={status} style={styles.modalOption} onPress={() => { setFormData({ ...formData, stock_status: status }); setShowStockDropdown(false); }}>
+                                <Text style={[styles.modalOptionText, formData.stock_status === status && styles.modalOptionTextActive]}>
+                                    {status.replace('_', ' ').toUpperCase()}
+                                </Text>
+                                {formData.stock_status === status && <MaterialIcons name="check" size={20} color={theme.colors.primary} />}
+                            </Pressable>
+                        ))}
+                    </View>
+                </Pressable>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -478,4 +511,27 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     saveBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
+    // Dropdown Modals
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#FFFFFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        paddingBottom: 48,
+    },
+    modalOption: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    modalOptionText: { fontSize: 16, color: '#374151' },
+    modalOptionTextActive: { fontWeight: '700', color: theme.colors.primary },
 });

@@ -1,4 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../services/supabase';
+
+const CATALOG_CACHE_KEY = 'silvercart_product_catalog';
 
 export interface Product {
     id: string;
@@ -9,6 +12,8 @@ export interface Product {
     image_url: string;
     stock_status: string;
     search_keywords: string[];
+    show_on_storefront?: boolean;
+    elderly_friendly?: boolean;
 }
 
 const STOPWORDS = new Set([
@@ -78,17 +83,38 @@ function scoreProductForQuery(product: Product, rawQuery: string): number {
 /**
  * Get all products (in stock) for customers
  */
-export async function getProductCatalog() {
-    const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('stock_status', 'in_stock');
+export async function getProductCatalog(): Promise<Product[]> {
+    // Try to load cached catalog immediately
+    const cached = await AsyncStorage.getItem(CATALOG_CACHE_KEY).catch(() => null);
+    let returnData = cached ? JSON.parse(cached) : null;
 
-    if (error) {
-        console.error('Error fetching product catalog:', error);
-        return [];
+    // Fetch fresh data
+    const fetchFresh = async () => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('stock_status', 'in_stock');
+
+        if (error) {
+            console.error('Error fetching product catalog:', error);
+            return null;
+        }
+        if (data) {
+            await AsyncStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(data)).catch(() => {});
+            return data;
+        }
+        return null;
+    };
+
+    if (returnData && returnData.length > 0) {
+        // Fire & forget background refresh
+        fetchFresh();
+        return returnData;
     }
-    return data || [];
+
+    // No cache, wait for fetch
+    const freshData = await fetchFresh();
+    return freshData || [];
 }
 
 /**

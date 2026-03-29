@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
     View, Text, StyleSheet, Pressable, ScrollView,
-    Image, ActivityIndicator, Alert
+    ActivityIndicator, Alert
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';

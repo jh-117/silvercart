@@ -112,7 +112,7 @@ const HTML_CONTENT = (apiKey: string) => `
 </main>
 
 <script>
-    const API_KEY = '\${apiKey}';
+    const API_KEY = '${apiKey}';
     // Init map centered on KL
     const map = L.map('map', { zoomControl: false }).setView([3.1390, 101.6869], 16);
 
@@ -247,23 +247,13 @@ const HTML_CONTENT = (apiKey: string) => `
     });
 
     function useMyLocation() {
-        if (!navigator.geolocation) {
-           updateAddressUI('Error', 'Location not supported');
-           return;
-        }
-        
         const loader = document.getElementById('selectedAddressTitle');
-        const oldText = loader.textContent;
         loader.textContent = 'Locating you...';
         document.getElementById('confirmBtn').disabled = true;
 
-        navigator.geolocation.getCurrentPosition((pos) => {
-            isInitialLoad = true; // So search bar updates with the new geo
-            map.flyTo([pos.coords.latitude, pos.coords.longitude], 17);
-        }, (err) => {
-            loader.textContent = oldText;
-            document.getElementById('confirmBtn').disabled = false;
-        }, { enableHighAccuracy: true });
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'REQUEST_LOCATION' }));
+        }
     }
 
     function confirmAddress() {
@@ -296,7 +286,7 @@ export default function CheckoutAddressScreen() {
         })();
     }, []);
 
-    const onMessage = (event: any) => {
+    const onMessage = async (event: any) => {
         try {
             const data = JSON.parse(event.nativeEvent.data);
             if (data.type === 'ADDRESS_CONFIRMED') {
@@ -304,6 +294,22 @@ export default function CheckoutAddressScreen() {
                 navigation.navigate('CheckoutPayment', {
                     delivery_address: data.address,
                 });
+            } else if (data.type === 'REQUEST_LOCATION') {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    const location = await Location.getCurrentPositionAsync({});
+                    webViewRef.current?.injectJavaScript(`
+                        isInitialLoad = true;
+                        map.flyTo([${location.coords.latitude}, ${location.coords.longitude}], 17);
+                        true;
+                    `);
+                } else {
+                    webViewRef.current?.injectJavaScript(`
+                        document.getElementById('selectedAddressTitle').textContent = 'Location access denied';
+                        document.getElementById('confirmBtn').disabled = false;
+                        true;
+                    `);
+                }
             }
         } catch (err) {
             console.error('Failed to parse WebView message:', err);

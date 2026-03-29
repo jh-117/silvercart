@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
@@ -37,7 +38,12 @@ export default function CartScreen() {
             <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Pressable 
+                        onPress={() => navigation.goBack()} 
+                        style={styles.backButton}
+                        accessibilityRole="button"
+                        accessibilityLabel="Go back"
+                    >
                         <MaterialIcons name="arrow-back-ios" size={24} color={theme.colors.primary} style={{ marginLeft: 8 }} />
                     </Pressable>
                     <Text style={styles.headerTitle}>My Cart</Text>
@@ -53,6 +59,8 @@ export default function CartScreen() {
                             <Pressable
                                 style={styles.shopBtn}
                                 onPress={() => navigation.goBack()}
+                                accessibilityRole="button"
+                                accessibilityLabel="Continue Shopping"
                             >
                                 <Text style={styles.shopBtnText}>Continue Shopping</Text>
                             </Pressable>
@@ -70,6 +78,8 @@ export default function CartScreen() {
                                     description: ci.product.description,
                                     category: ci.product.category,
                                 })}
+                                accessibilityRole="button"
+                                accessibilityLabel={`View details for ${ci.product.name}`}
                             >
                                 <View style={styles.itemHeader}>
                                     {ci.product.image_url ? (
@@ -93,13 +103,17 @@ export default function CartScreen() {
                                         <Pressable
                                             style={styles.quantityBtnOutline}
                                             onPress={() => handleUpdateQuantity(ci.product.id, -1)}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`Decrease quantity for ${ci.product.name}`}
                                         >
                                             <MaterialIcons name="remove" size={24} color={theme.colors.primary} />
                                         </Pressable>
-                                        <Text style={styles.quantityText}>{ci.quantity}</Text>
+                                        <Text style={styles.quantityText} accessibilityLabel={`Quantity ${ci.quantity}`}>{ci.quantity}</Text>
                                         <Pressable
                                             style={styles.quantityBtnFilled}
                                             onPress={() => handleUpdateQuantity(ci.product.id, 1)}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`Increase quantity for ${ci.product.name}`}
                                         >
                                             <MaterialIcons name="add" size={24} color={theme.colors.white} />
                                         </Pressable>
@@ -131,6 +145,8 @@ export default function CartScreen() {
                     <Pressable
                         style={({ pressed }) => [styles.checkoutButton, pressed && styles.checkoutButtonPressed]}
                         onPress={() => navigation.navigate('CheckoutAddress')}
+                        accessibilityRole="button"
+                        accessibilityLabel="Proceed to Checkout"
                     >
                         <MaterialIcons name="shopping-cart-checkout" size={28} color={theme.colors.white} />
                         <Text style={styles.checkoutText}>Checkout</Text>

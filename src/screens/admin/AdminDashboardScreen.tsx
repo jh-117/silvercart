@@ -140,8 +140,8 @@ export default function AdminDashboardScreen() {
                         >
                             <View style={styles.orderTop}>
                                 <Text style={styles.orderId}>#{order.id.slice(0, 8).toUpperCase()}</Text>
-                                <View style={[styles.badge, { backgroundColor: `${STATUS_COLOR[order.status]}20` }]}>
-                                    <Text style={[styles.badgeText, { color: STATUS_COLOR[order.status] }]}>
+                                <View style={[styles.badge, { backgroundColor: STATUS_COLOR[order.status] }]}>
+                                    <Text style={styles.badgeText}>
                                         {order.status.toUpperCase()}
                                     </Text>
                                 </View>
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
         fontFamily: theme.typography.fontFamily.bold,
     },
     badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-    badgeText: { fontSize: 11, fontWeight: '700', fontFamily: theme.typography.fontFamily.bold, letterSpacing: 0.5 },
+    badgeText: { fontSize: 11, fontWeight: '700', fontFamily: theme.typography.fontFamily.bold, letterSpacing: 0.5, color: '#FFFFFF' },
     orderName: {
         fontSize: 14,
         color: '#64748B',
