@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
+import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../services/supabase';
 
 type OrderSuccessRouteProp = RouteProp<RootStackParamList, 'OrderSuccess'>;
 
@@ -12,6 +14,21 @@ export default function OrderSuccessScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<OrderSuccessRouteProp>();
     const { orderId } = route.params;
+    const { user } = useAuth();
+    const [trustedContactName, setTrustedContactName] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!user) return;
+        supabase
+            .from('trusted_contacts')
+            .select('full_name')
+            .eq('user_id', user.id)
+            .limit(1)
+            .single()
+            .then(({ data }) => {
+                if (data?.full_name) setTrustedContactName(data.full_name);
+            });
+    }, [user]);
 
     return (
         <View style={styles.container}>
@@ -66,7 +83,9 @@ export default function OrderSuccessScreen() {
                             <Text style={styles.statusTitle}>Assistant Notified</Text>
                             <Text style={styles.statusDescription}>
                                 We've notified your trusted contact,{' '}
-                                <Text style={styles.highlightedText}>Sarah</Text>, that your order is on its way.
+                                <Text style={styles.highlightedText}>
+                                    {trustedContactName ?? 'your trusted contact'}
+                                </Text>, that your order is on its way.
                             </Text>
                         </View>
                     </View>

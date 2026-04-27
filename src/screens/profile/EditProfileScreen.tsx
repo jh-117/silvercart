@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Image, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Image, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,6 +23,8 @@ export default function EditProfileScreen() {
     const [address, setAddress] = useState('');
     const [avatarUri, setAvatarUri] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const scrollRef = useRef<ScrollView>(null);
+    const addressInputRef = useRef<TextInput>(null);
 
     const onDateChange = (event: any, selectedDate?: Date) => {
         setShowDatePicker(false);
@@ -99,7 +101,11 @@ export default function EditProfileScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+        >
             {/* Header */}
             <SafeAreaView edges={['top']} style={styles.header}>
                 <View style={styles.headerContent}>
@@ -126,9 +132,11 @@ export default function EditProfileScreen() {
 
             {/* Content */}
             <ScrollView
+                ref={scrollRef}
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
             >
                 {loading ? (
                     <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
@@ -203,6 +211,7 @@ export default function EditProfileScreen() {
                         <View style={styles.section}>
                             <Text style={styles.sectionLabel}>Address</Text>
                             <TextInput
+                                ref={addressInputRef}
                                 style={[styles.input, styles.textArea]}
                                 placeholder="Enter your address"
                                 value={address}
@@ -210,12 +219,17 @@ export default function EditProfileScreen() {
                                 multiline
                                 numberOfLines={3}
                                 placeholderTextColor={theme.colors.textMuted}
+                                onFocus={() => {
+                                    setTimeout(() => {
+                                        scrollRef.current?.scrollToEnd({ animated: true });
+                                    }, 300);
+                                }}
                             />
                         </View>
                     </>
                 )}
             </ScrollView>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 

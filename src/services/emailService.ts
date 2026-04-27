@@ -99,4 +99,12 @@ export const emailService = {
         const message = `Hi ${contactName}, ${userName} placed a new SilverCart order (${orderId}).`;
         return sendSms({ to: contactPhone, message });
     },
+
+    /**
+     * Send a real test SMS to the Twilio-verified number.
+     * Used by the Trusted Contact "Send Test SMS" button.
+     */
+    async sendTestSms(verifiedPhone: string, message: string) {
+        return sendSms({ to: verifiedPhone, message });
+    },
 };

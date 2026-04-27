@@ -77,34 +77,45 @@ export default function CheckoutReviewScreen() {
                     emailService.sendReceiptEmail(user.email, result.orderId, total).catch(console.error);
                 }
 
-                // Notify trusted contacts
+                // Notify trusted contacts — always send to the Twilio-verified number on trial
+                const VERIFIED_SMS_NUMBER = '+60183714142';
                 try {
-                    const { data: contacts } = await supabase
-                        .from('trusted_contacts')
-                        .select('*')
-                        .eq('user_id', user.id);
+                    // Fetch contacts AND the user's real profile name in parallel
+                    const [{ data: contacts }, { data: profile }] = await Promise.all([
+                        supabase.from('trusted_contacts').select('*').eq('user_id', user.id),
+                        supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+                    ]);
+
+                    // Use profile name → fallback to auth metadata → fallback to 'Customer'
+                    const senderName =
+                        profile?.full_name ||
+                        user.user_metadata?.full_name ||
+                        'Customer';
 
                     if (contacts && contacts.length > 0) {
-                        const smsResults = await Promise.allSettled(
+                        // Fire in background — do NOT await or alert on failure,
+                        // the order is already placed.
+                        Promise.allSettled(
                             contacts.map((contact) =>
                                 emailService.sendOrderNotificationEmail(
                                     contact.full_name || contact.name,
-                                    contact.phone_number,
-                                    user.user_metadata?.full_name || 'Customer',
+                                    VERIFIED_SMS_NUMBER,   // Twilio trial: only this number is verified
+                                    senderName,
                                     result.orderId!
                                 )
                             )
-                        );
-
-                        const failed = smsResults.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
-                        if (failed) {
-                            const message = failed.reason?.message || 'Trusted contact SMS could not be sent.';
-                            Alert.alert('Order placed', message);
-                        }
+                        ).then((results) => {
+                            results.forEach((r) => {
+                                if (r.status === 'rejected') {
+                                    console.warn('[SMS] Trusted contact notification failed:', r.reason?.message);
+                                }
+                            });
+                        });
                     }
                 } catch (err) {
                     console.error('Failed to notify contacts', err);
                 }
+
 
                 navigation.navigate('OrderSuccess', { orderId: result.orderId });
             } else {

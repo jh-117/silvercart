@@ -6,18 +6,8 @@ import { theme } from '../../theme';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
-import * as Notifications from 'expo-notifications';
+import { emailService } from '../../services/emailService';
 import { useToast } from '../../hooks/useToast';
-
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
-});
 
 interface TrustedContact {
     id: string;
@@ -32,6 +22,10 @@ export default function TrustedContactScreen() {
     const toast = useToast();
     const [contacts, setContacts] = useState<TrustedContact[]>([]);
     const [loading, setLoading] = useState(true);
+    const [sendingId, setSendingId] = useState<string | null>(null);
+
+    // Twilio trial: only this number is verified for outbound SMS
+    const VERIFIED_TEST_NUMBER = '+60183714142';
 
     useFocusEffect(
         React.useCallback(() => {
@@ -62,23 +56,20 @@ export default function TrustedContactScreen() {
         ]);
     };
 
-    const handleTestNotification = async (contactName: string) => {
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Turn On Notifications', 'Please go to your phone settings to allow SilverCart to send you updates.');
-            return;
+    const handleTestNotification = async (contact: TrustedContact) => {
+        if (sendingId) return;
+        setSendingId(contact.id);
+        try {
+            const userName = user?.user_metadata?.full_name || 'Your family member';
+            const message = `[SilverCart Test] Hi ${contact.full_name}, this is a test SMS from ${userName}'s SilverCart account. Trusted contact notifications are working correctly.`;
+            await emailService.sendTestSms(VERIFIED_TEST_NUMBER, message);
+            toast.showSuccess(`SMS sent to ${VERIFIED_TEST_NUMBER} ✓`);
+        } catch (err: any) {
+            const msg: string = err?.message ?? 'Failed to send SMS';
+            toast.showError(msg);
+        } finally {
+            setSendingId(null);
         }
-
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: 'SilverCart Test Alert 🚨',
-                body: `This is a mock. In reality, ${contactName} would receive this exact push notification on their device.`,
-                sound: true,
-            },
-            trigger: null, // send immediately
-        });
-
-        toast.showSuccess(`Test push notification dispatched!`);
     };
 
     return (
@@ -172,11 +163,22 @@ export default function TrustedContactScreen() {
                                     </Pressable>
 
                                     <Pressable
-                                        style={({ pressed }) => [styles.testNotificationButton, pressed && styles.buttonPressedOpacity]}
-                                        onPress={() => handleTestNotification(contact.full_name)}
+                                        style={({ pressed }) => [
+                                            styles.testNotificationButton,
+                                            pressed && styles.buttonPressedOpacity,
+                                            sendingId === contact.id && styles.testNotificationSending,
+                                        ]}
+                                        onPress={() => handleTestNotification(contact)}
+                                        disabled={!!sendingId}
                                     >
-                                        <MaterialIcons name="notifications-active" size={24} color={theme.colors.primary} />
-                                        <Text style={styles.testNotificationText}>Test Notification</Text>
+                                        {sendingId === contact.id ? (
+                                            <ActivityIndicator size="small" color={theme.colors.primary} />
+                                        ) : (
+                                            <MaterialIcons name="sms" size={24} color={theme.colors.primary} />
+                                        )}
+                                        <Text style={styles.testNotificationText}>
+                                            {sendingId === contact.id ? 'Sending SMS…' : 'Send Test SMS'}
+                                        </Text>
                                     </Pressable>
 
                                     {/* Add new / Remove layout */}
@@ -441,6 +443,9 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         borderWidth: 2,
         borderColor: `${theme.colors.primary}33`,
+    },
+    testNotificationSending: {
+        opacity: 0.6,
     },
     testNotificationText: {
         fontSize: 18,

@@ -147,7 +147,32 @@ export function useReminders() {
         }
     };
 
-    return { reminders, loading, addReminder, removeReminder };
+    const updateReminder = async (id: string, newHour: number, newMinute: number) => {
+        try {
+            const existing = reminders.find(r => r.id === id);
+            if (!existing) return false;
+            // Cancel old notification
+            await Notifications.cancelScheduledNotificationAsync(id);
+            // Schedule new one
+            let newId: string;
+            if (existing.weekdays && existing.weekdays.length > 0) {
+                newId = await scheduleWeeklyNotif(existing.title, existing.body, newHour, newMinute, existing.weekdays[0]);
+            } else {
+                newId = await scheduleDailyNotif(existing.title, existing.body, newHour, newMinute);
+            }
+            const updated = reminders.map(r =>
+                r.id === id ? { ...r, id: newId, hour: newHour, minute: newMinute } : r
+            );
+            setReminders(updated);
+            await AsyncStorage.setItem(REMINDERS_KEY, JSON.stringify(updated));
+            return true;
+        } catch (e) {
+            console.error('Failed to update reminder', e);
+            return false;
+        }
+    };
+
+    return { reminders, loading, addReminder, removeReminder, updateReminder };
 }
 
 // ─────────────────────────────────────────────
@@ -236,5 +261,37 @@ export function useAutoReorders() {
         }
     };
 
-    return { autoReorders, loading, addAutoReorder, removeAutoReorder };
+    const updateAutoReorder = async (id: string, newHour: number, newMinute: number) => {
+        try {
+            const entry = autoReorders.find(r => r.id === id);
+            if (!entry) return false;
+            // Cancel old notifications
+            for (const nid of entry.notificationIds) {
+                await Notifications.cancelScheduledNotificationAsync(nid);
+            }
+            // Reschedule
+            const title = '🛒 Time to Reorder!';
+            const body = `Your ${entry.productName} may be running low. Check your cart before confirming!`;
+            const newNotifIds: string[] = [];
+            if (entry.weekdays && entry.weekdays.length > 0) {
+                for (const wd of entry.weekdays) {
+                    newNotifIds.push(await scheduleWeeklyNotif(title, body, newHour, newMinute, wd));
+                }
+            } else {
+                const days = entry.intervalDays ?? 30;
+                newNotifIds.push(await scheduleIntervalNotif(title, body, days * 24 * 60 * 60));
+            }
+            const updated = autoReorders.map(r =>
+                r.id === id ? { ...r, hour: newHour, minute: newMinute, notificationIds: newNotifIds } : r
+            );
+            setAutoReorders(updated);
+            await AsyncStorage.setItem(AUTOREORDER_KEY, JSON.stringify(updated));
+            return true;
+        } catch (e) {
+            console.error('Failed to update auto-reorder', e);
+            return false;
+        }
+    };
+
+    return { autoReorders, loading, addAutoReorder, removeAutoReorder, updateAutoReorder };
 }
